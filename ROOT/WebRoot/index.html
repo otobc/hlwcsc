@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html>
+<!
+<script src="http://127.0.0.1:80/angular.min.js">
+<script src="http://192.168.1.137/angular.min.js">
+</script>
+<!
+<script src="http://127.0.0.1:80/echarts-2.2.7/build/dist/echarts.js">
+<script src="http://192.168.1.137/echarts-2.2.7/build/dist/echarts.js">
+</script>
+<body>
+
+<div ng-app="myApp" ng-controller="evalutionCtrl"> 
+<p>
+id:
+<input type="text" ng-model="id">
+</p>
+<button ng-click="evaluate()">evaluate</button>
+
+<ul>
+  <li ng-repeat="x in keys">
+    {{ x + ' = ' + variants[x] + ';'}}
+  </li>
+</ul>
+
+</div>
+<div id="main" style="height:400px"></div>
+
+<script>
+var app = angular.module('myApp', []);
+app.controller('evalutionCtrl', function($scope, $http) {
+  $scope.evaluate = function() {
+    url = "http://192.168.1.137/servlet/ExpIdInput?id=" + $scope.id
+    //url = "http://127.0.0.1:80/servlet/ExpIdInput?id="+$scope.id;
+    $http.get(url).success(
+        function (response) {
+            keys = Array()
+            data_k = Array()
+            data_v = Array()
+            for (var key in response) {
+                if (key[0] != "_") {
+                    keys.push(key);
+                    }
+                else {
+                    data_k.push({ text: key.substr(1), max: 1.0});
+                    data_v.push(response[key]);
+                    }
+                }
+            console.log(data_k);
+            console.log(data_v);
+            $scope.variants = response;
+            $scope.keys = keys;
+            require.config({
+                paths: {
+                    echarts: 'http://192.168.1.137/echarts-2.2.7/build/dist'
+                    //echarts: 'http://127.0.0.1:80/echarts-2.2.7/build/dist'
+                }
+            });
+        
+            require(
+                [
+                    'echarts',
+                    'echarts/chart/radar'
+                ],
+                function (ec) {
+                    var myChart = ec.init(document.getElementById('main')); 
+                    
+                    var option = {
+                        tooltip: {
+                            trigger: 'axis'
+                        },
+                        legend: {
+                            data:['score']
+                        },
+                        polar : [
+                               {
+                                   indicator : data_k
+                               }
+                        ],
+                        calculable : true,
+                        series : [
+                            {
+                                "name": "score",
+                                "type": "radar",
+                                "data": [
+                                        {
+                                        value: data_v,
+                                        name: "score"
+                                        }
+                                    ]
+                            }
+                        ]
+                    };
+            
+                    myChart.setOption(option); 
+                    }
+                );
+            }
+        );
+  }
+});
+</script>
+
+</body>
+</html>
