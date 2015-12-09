@@ -1,15 +1,13 @@
 <!DOCTYPE html>
 <html>
-<!
-<script src="http://127.0.0.1:80/angular.min.js">
-<script src="http://192.168.1.137/angular.min.js">
-</script>
-<!
-<script src="http://127.0.0.1:80/echarts-2.2.7/build/dist/echarts.js">
-<script src="http://192.168.1.137/echarts-2.2.7/build/dist/echarts.js">
-</script>
-<body>
 
+<!-- <script src="http://127.0.0.1/angular.min.js"> -->
+<script src="http://www.8c.com/angular.min.js"></script>
+
+<!-- <script src="http://127.0.0.1/echarts-2.2.7/build/dist/echarts.js">  -->
+<script src="http://www.8c.com/echarts-2.2.7/build/dist/echarts.js"></script>
+
+<body>
 <div ng-app="myApp" ng-controller="evalutionCtrl"> 
 <p>
 id:
@@ -30,8 +28,8 @@ id:
 var app = angular.module('myApp', []);
 app.controller('evalutionCtrl', function($scope, $http) {
   $scope.evaluate = function() {
-    url = "http://192.168.1.137/servlet/ExpIdInput?id=" + $scope.id
-    //url = "http://127.0.0.1:80/servlet/ExpIdInput?id="+$scope.id;
+    url = "http://www.8c.com/servlet/ExpIdInput?id=" + $scope.id
+    //url = "http://127.0.0.1/servlet/ExpIdInput?id="+$scope.id;
     $http.get(url).success(
         function (response) {
             keys = Array()
@@ -52,8 +50,8 @@ app.controller('evalutionCtrl', function($scope, $http) {
             $scope.keys = keys;
             require.config({
                 paths: {
-                    echarts: 'http://192.168.1.137/echarts-2.2.7/build/dist'
-                    //echarts: 'http://127.0.0.1:80/echarts-2.2.7/build/dist'
+                    echarts: 'http://www.8c.com/echarts-2.2.7/build/dist'
+                    //echarts: 'http://127.0.0.1/echarts-2.2.7/build/dist'
                 }
             });
         
