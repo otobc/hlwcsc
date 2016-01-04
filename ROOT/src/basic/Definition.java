@@ -8,6 +8,9 @@ public class Definition {
 		public static final int SUM = 1;
 		public static final int MAX = 2;
 		public static final int MIN = 3;
+		public static final int ALL = 4;
+		public static final int ANY = 5;
+		public static final int NONE = 6;
 	}
 	
 	// 数据类型
