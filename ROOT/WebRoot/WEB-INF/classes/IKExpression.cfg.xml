@@ -31,17 +31,12 @@
 	</bean>
 	
 	<!-- 用户函数配置  请在这里定制您自己的函数-->
-<!-- 
-	<bean class="org.wltea.expression.test.TestFunctions">
-		<constructor-args>
-			<constructor-arg type="java.lang.Integer">123</constructor-arg>
-			<constructor-arg type="java.lang.String">aa</constructor-arg>
-		</constructor-args>
-		<function name="问好" method="sayHello">
-			<parameter-type>java.lang.String</parameter-type>
+	<bean class="extexp.Extexp">
+		<function name="MERGE_BASIC" method="merge_basic">
+			<parameter-type>java.util.List</parameter-type>
+			<parameter-type>int</parameter-type>
 		</function>
 	</bean>
- -->
 
 
 </function-configuration>

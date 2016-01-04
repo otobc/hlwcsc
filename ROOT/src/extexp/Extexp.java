@@ -105,7 +105,11 @@ public class Extexp {
 			}
 			rawdata.add(group);
 		}
-		List mergedata = merge_basic(rawdata, Definition.MergeBasicArgs.SUM);
+		
+		String expression = "$MERGE_BASIC(rawdata, 0)";
+		List<Variable> variables = new ArrayList<Variable>();
+		variables.add(Variable. createVariable ("rawdata", rawdata));
+		Object mergedata = ExpressionEvaluator. evaluate (expression, variables);
 		System.out.println(rawdata);
 		System.out.println(mergedata);
 	}
