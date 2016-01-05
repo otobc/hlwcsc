@@ -36,6 +36,11 @@
 			<parameter-type>java.util.List</parameter-type>
 			<parameter-type>int</parameter-type>
 		</function>
+		<function name="ESTIMATE_BASIC" method="estimate_basic">
+			<parameter-type>java.util.List</parameter-type>
+			<parameter-type>java.util.Date</parameter-type>
+			<parameter-type>int</parameter-type>
+		</function>
 	</bean>
 
 

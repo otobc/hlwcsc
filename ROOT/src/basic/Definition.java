@@ -13,6 +13,15 @@ public class Definition {
 		public static final int NONE = 6;
 	}
 	
+	public class EstimateBasicArgs {
+		public static final int AVG = 0;
+		public static final int MAX = 1;
+		public static final int MIN = 2;
+		public static final int NEAREST = 3;
+		public static final int EARLIER = 4;
+		public static final int LATER = 5;
+	}
+	
 	// 数据类型
 	public class Datatype {
 		public static final String STRING = "0";
