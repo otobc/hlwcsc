@@ -14,3 +14,4 @@ hs_err_pid*
 # About Project
 .classpath
 .project
+.settings
