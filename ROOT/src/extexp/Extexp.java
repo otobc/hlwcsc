@@ -107,7 +107,7 @@ public class Extexp {
 					merge.add(datasum_d);
 				}
 				else {
-					throw new Exception(String.format("merge_basic，参数[%s]与类型[%s]不匹配", flag, datatype));
+					throw new Exception(String.format("merge_basic，参数[%d]与类型[%s]不匹配", flag, datatype));
 				}
 				break;
 			case Definition.MergeBasicArgs.MAX:
@@ -118,7 +118,7 @@ public class Extexp {
 					merge.add(datamax_d);
 				}
 				else {
-					throw new Exception(String.format("merge_basic，参数[%s]与类型[%s]不匹配", flag, datatype));
+					throw new Exception(String.format("merge_basic，参数[%d]与类型[%s]不匹配", flag, datatype));
 				}
 				break;
 			case Definition.MergeBasicArgs.MIN:
@@ -129,7 +129,7 @@ public class Extexp {
 					merge.add(datamin_d);
 				}
 				else {
-					throw new Exception(String.format("merge_basic，参数[%s]与类型[%s]不匹配", flag, datatype));
+					throw new Exception(String.format("merge_basic，参数[%d]与类型[%s]不匹配", flag, datatype));
 				}
 				break;
 			case Definition.MergeBasicArgs.ALL:
@@ -137,7 +137,7 @@ public class Extexp {
 					merge.add(dataall);
 				}
 				else {
-					throw new Exception(String.format("merge_basic，参数[%s]与类型[%s]不匹配", flag, datatype));
+					throw new Exception(String.format("merge_basic，参数[%d]与类型[%s]不匹配", flag, datatype));
 				}
 				break;
 			case Definition.MergeBasicArgs.ANY:
@@ -145,7 +145,7 @@ public class Extexp {
 					merge.add(dataany);
 				}
 				else {
-					throw new Exception(String.format("merge_basic，参数[%s]与类型[%s]不匹配", flag, datatype));
+					throw new Exception(String.format("merge_basic，参数[%d]与类型[%s]不匹配", flag, datatype));
 				}
 				break;
 			case Definition.MergeBasicArgs.NONE:
@@ -153,11 +153,11 @@ public class Extexp {
 					merge.add(datanone);
 				}
 				else {
-					throw new Exception(String.format("merge_basic，参数[%s]与类型[%s]不匹配", flag, datatype));
+					throw new Exception(String.format("merge_basic，参数[%d]与类型[%s]不匹配", flag, datatype));
 				}
 				break;
 			default:
-				throw new Exception(String.format("merge_basic，错误的参数[%s]", flag));
+				throw new Exception(String.format("merge_basic，错误的参数[%d]", flag));
 			}
 			
 			merge.add(datatime);
@@ -275,7 +275,7 @@ public class Extexp {
 				ret.add(datamax_d);
 			}
 			else {
-				throw new Exception(String.format("estimate_basic，参数[%s]与类型[%s]不匹配", flag, datatype));
+				throw new Exception(String.format("estimate_basic，参数[%d]与类型[%s]不匹配", flag, datatype));
 			}
 			break;
 		case Definition.EstimateBasicArgs.MIN:
@@ -286,20 +286,30 @@ public class Extexp {
 				ret.add(datamin_d);
 			}
 			else {
-				throw new Exception(String.format("estimate_basic，参数[%s]与类型[%s]不匹配", flag, datatype));
+				throw new Exception(String.format("estimate_basic，参数[%d]与类型[%s]不匹配", flag, datatype));
 			}
 			break;
 		case Definition.EstimateBasicArgs.NEAREST:
 			ret.add(datanearest);
 			break;
 		case Definition.EstimateBasicArgs.EARLIER:
-			ret.add(dataearlier);
+			if (earlier != null) {
+				ret.add(dataearlier);
+			}
+			else {
+				throw new Exception(String.format("estimate_basic，参数[%d]，时间[%s]超出范围", flag, dateFm.format(t)));
+			}
 			break;
 		case Definition.EstimateBasicArgs.LATER:
-			ret.add(datalater);
+			if (later != null) {
+				ret.add(datalater);
+			}
+			else {
+				throw new Exception(String.format("estimate_basic，参数[%d]，时间[%s]超出范围", flag, dateFm.format(t)));
+			}
 			break;
 		default:
-			throw new Exception(String.format("estimate_basic，错误的参数[%s]", flag));
+			throw new Exception(String.format("estimate_basic，错误的参数[%d]", flag));
 		}
 		ret.add(t);
 		
@@ -334,7 +344,7 @@ public class Extexp {
 				group.add(nodedata);
 			}
 			rawdata.add(group);
-			thread.sleep(1000);
+			//thread.sleep(1000);
 		}
 		System.out.println(rawdata);
 		
