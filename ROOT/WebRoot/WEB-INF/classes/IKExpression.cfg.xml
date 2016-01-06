@@ -32,6 +32,12 @@
 	
 	<!-- 用户函数配置  请在这里定制您自己的函数-->
 	<bean class="extexp.Extexp">
+		<function name="SELECT" method="select">
+			<parameter-type>java.lang.String</parameter-type>
+			<parameter-type>java.lang.String</parameter-type>
+			<parameter-type>java.util.Date</parameter-type>
+			<parameter-type>java.util.Date</parameter-type>
+		</function>
 		<function name="MERGE_BASIC" method="merge_basic">
 			<parameter-type>java.util.List</parameter-type>
 			<parameter-type>int</parameter-type>
@@ -41,7 +47,12 @@
 			<parameter-type>java.util.Date</parameter-type>
 			<parameter-type>int</parameter-type>
 		</function>
+		<function name="TODATE" method="todate">
+			<parameter-type>java.lang.String</parameter-type>
+		</function>
+		<function name="CPDATE" method="cpdate">
+			<parameter-type>java.util.Date</parameter-type>
+			<parameter-type>long</parameter-type>
+		</function>
 	</bean>
-
-
 </function-configuration>
