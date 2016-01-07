@@ -1,17 +1,12 @@
 package basic;
 
-import java.util.*;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import meth.Meth;
-
 // 枚举型及类枚举型定义在此
 public class Definition {
 	
 	public static final double threhold = 0.000000001;
 	
 	// 基础融合函数的额外参数
-	public class MergeBasicArgs {
+	public static class MergeBasicArgs {
 		public static final int AVG = 0;
 		public static final int SUM = 1;
 		public static final int MAX = 2;
@@ -21,7 +16,7 @@ public class Definition {
 		public static final int NONE = 6;
 	}
 	
-	public class EstimateBasicArgs {
+	public static class EstimateBasicArgs {
 		public static final int AVG = 0;
 		public static final int MAX = 1;
 		public static final int MIN = 2;
@@ -37,8 +32,6 @@ public class Definition {
 		public static final String DOUBLE = "2";
 		public static final String BOOLEAN = "3";
 	}
-	
-	public enum Ststype {MIN, MAX, AVG, VAR, TP}
 	
 	public static void main(String[] args){
 
