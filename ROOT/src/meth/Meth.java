@@ -19,9 +19,8 @@ public class Meth {
 	
 	private static class InnerMeth {
 		@SuppressWarnings("unused")
-		public double threshold1(String indexid , Object value) throws Exception {
+		public double threshold1(Sts sts, Object value) throws Exception {
 			double ret = 0.0;
-			Sts sts = new Sts(indexid);
 			if (value instanceof Number) {
 				ret = (double)sts.max / (double)value;
 			}
@@ -33,9 +32,8 @@ public class Meth {
 		}
 		
 		@SuppressWarnings("unused")
-		public double threshold2(String indexid , Object value) throws Exception {
+		public double threshold2(Sts sts, Object value) throws Exception {
 			double ret = 0.0;
-			Sts sts = new Sts(indexid);
 			if (value instanceof Number) {	
 				double max = (double)sts.max;
 				double min = (double)sts.min;
@@ -49,9 +47,8 @@ public class Meth {
 		}
 		
 		@SuppressWarnings("unused")
-		public double threshold3(String indexid , Object value) throws Exception {
+		public double threshold3(Sts sts, Object value) throws Exception {
 			double ret = 0.0;
-			Sts sts = new Sts(indexid);
 			if (value instanceof Number) {	
 				double max = (double)sts.max;
 				double min = (double)sts.min;
@@ -70,9 +67,8 @@ public class Meth {
 		}
 		
 		@SuppressWarnings("unused")
-		public double threshold4(String indexid , Object value) throws Exception {
+		public double threshold4(Sts sts, Object value) throws Exception {
 			double ret = 0.0;
-			Sts sts = new Sts(indexid);
 			if (value instanceof Number) {	
 				double max = (double)sts.max;
 				double min = (double)sts.min;
@@ -91,9 +87,8 @@ public class Meth {
 		}
 		
 		@SuppressWarnings("unused")
-		public double normalize(String indexid , Object value) throws Exception {
+		public double normalize(Sts sts, Object value) throws Exception {
 			double ret = 0.0;
-			Sts sts = new Sts(indexid);
 			if (value instanceof Number) {	
 				double avg = (double)sts.avg;
 				double var = (double)sts.var;
@@ -112,7 +107,7 @@ public class Meth {
 		}
 		
 		@SuppressWarnings("unused")
-		public double bool1(String indexid , Object value) throws Exception {
+		public double bool1(Sts sts, Object value) throws Exception {
 			double ret = 0.0;
 			if (value instanceof Boolean) {
 				ret = (boolean)value ? 1.0 : 0.0;
@@ -125,9 +120,8 @@ public class Meth {
 		}
 		
 		@SuppressWarnings("unused")
-		public double bool2(String indexid , Object value) throws Exception {
+		public double bool2(Sts sts, Object value) throws Exception {
 			double ret = 0.0;
-			Sts sts = new Sts(indexid);
 			if (value instanceof Boolean) {
 				double tp = (double)sts.tp; 
 				ret = (boolean)value ? tp : 1.0-tp;
@@ -163,17 +157,17 @@ public class Meth {
 		
 		private int avgmbsp(List<Double> vector, List<Integer> level, int k) {
 			int ret = 0;
-			double sum1 = 0.0;
-			double sum2 = 0.0;
+			double wsum = 0.0;
+			double sum = 0.0;
 			int idx = 0;
 			for (Iterator<Double> i = vector.iterator();i.hasNext();) {
 				double mbsp = (double)i.next();
-				sum1 += (int)level.get(idx) * Math.pow(mbsp, k);
-				sum2 +=  Math.pow(mbsp, k);
+				wsum += (int)level.get(idx) * Math.pow(mbsp, k);
+				sum +=  Math.pow(mbsp, k);
 				idx += 1;
 			}
 			
-			ret = (int)Math.round(sum1/sum2);
+			ret = (int)Math.round(wsum/sum);
 			return ret;
 		}
 		
@@ -200,13 +194,13 @@ public class Meth {
 	
 	public Meth() throws NoSuchMethodException, SecurityException {
 		nmmtd = new HashMap<String, Method>();
-		nmmtd.put("01", InnerMeth.class.getMethod("threshold1", String.class, Object.class));
-		nmmtd.put("02", InnerMeth.class.getMethod("threshold2", String.class, Object.class));
-		nmmtd.put("03", InnerMeth.class.getMethod("threshold3", String.class, Object.class));
-		nmmtd.put("04", InnerMeth.class.getMethod("threshold4", String.class, Object.class));
-		nmmtd.put("05", InnerMeth.class.getMethod("normalize", String.class, Object.class));
-		nmmtd.put("06", InnerMeth.class.getMethod("bool1", String.class, Object.class));
-		nmmtd.put("07", InnerMeth.class.getMethod("bool2", String.class, Object.class));
+		nmmtd.put("01", InnerMeth.class.getMethod("threshold1", Sts.class, Object.class));
+		nmmtd.put("02", InnerMeth.class.getMethod("threshold2", Sts.class, Object.class));
+		nmmtd.put("03", InnerMeth.class.getMethod("threshold3", Sts.class, Object.class));
+		nmmtd.put("04", InnerMeth.class.getMethod("threshold4", Sts.class, Object.class));
+		nmmtd.put("05", InnerMeth.class.getMethod("normalize", Sts.class, Object.class));
+		nmmtd.put("06", InnerMeth.class.getMethod("bool1", Sts.class, Object.class));
+		nmmtd.put("07", InnerMeth.class.getMethod("bool2", Sts.class, Object.class));
 		
 		gemtd = new HashMap<String, Method>();
 		gemtd.put("01", InnerMeth.class.getMethod("maxmbsp", List.class, List.class));
@@ -219,10 +213,10 @@ public class Meth {
 	}
 	
 	// 公共无量纲化函数入口
-	public static double exenm(String id, String indexid, Object value) throws IllegalAccessException, IllegalArgumentException, InvocationTargetException {
+	public static double exenm(String id, Sts sts, Object value) throws IllegalAccessException, IllegalArgumentException, InvocationTargetException {
 		double ret = 0.0;
 		Method method = (Method)nmmtd.get(id);
-		ret = (double)method.invoke(meth, indexid, value);
+		ret = (double)method.invoke(meth, sts, value);
 		return ret;
 	}
 	

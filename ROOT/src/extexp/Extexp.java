@@ -31,7 +31,7 @@ public class Extexp {
 	public static List<List<List<Comparable>>> select(String id, String environmentid, Date begintime, Date endtime) throws InterruptedException {
 		List<List<List<Comparable>>> ret = new ArrayList<List<List<Comparable>>>(); 
 
-		// DEBUG
+		// TODO
 		id = String.format("%08d", random.nextInt(100));
 		for (int i = 0; i < 5; i++) {
 			List<List<Comparable>> group = new ArrayList<List<Comparable>>();
