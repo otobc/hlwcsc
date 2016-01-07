@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <script src="./angular.min.js"></script> 
+    </head>
+    <body>
+        <div id="main" ng-app="admin" ng-controller="main">
+            <script>
+                var table = "table"
+                var app = angular.module("admin", []);
+            </script>
+            <div id="list" ng-show="isListShow">
+                <div id="listtitle">
+                    <h1>{{ conf.title }}</h1>
+                    <button>ADD</button>
+                </div>
+                <div id="listquery" ng-controller="listquery">
+                    <table>
+                        <tr ng-repeat="column in conf.columns" ng-show="column.isSelect">
+                            <td>{{ column.name }}</td>
+                            <td><input type=text ng-disabled="disabled" ng-model="query[column.id]"></td>
+                        </tr>
+                        <tr>
+                            <td><button ng-disabled="disabled" ng-click="search()">SEARCH</button></td>
+                        </tr>
+                    </table>
+                </div>
+                <script>
+                    app.controller(
+                        "listquery",
+                        function($scope, $rootScope, $http) {
+                            $scope.query = {};
+                            $scope.search = function() {
+                                data = [];
+                                console.log("search...");
+                                for (var i=0; i<$scope.conf.columns.length; i++) {
+                                    if ($scope.conf.columns[i].isShow) {
+                                        data.push($scope.conf.columns[i].id);
+                                        }
+                                    }
+                                //url = "./list.jsp?table=" + $scope.conf.table + "&data=" + JSON.stringify(data) + "&query=" + JSON.stringify($scope.query) + "&begin=1&end=" + $scope.conf.count;
+                                url = "./list.json"
+                                console.log("url" + url);
+                                $scope.disabled = true;
+                                $http.get(url).success(
+                                    function(response) {
+                                        $scope.disabled = false;
+                                        $rootScope.listcontent = response;
+                                        }
+                                    );
+                                }
+                            }
+                        )
+                </script>
+                <div id="listcontent">
+                    <table>
+                        <tr>
+                            <td ng-repeat="column in conf.columns" ng-show="column.isShow">
+                                {{ column.name }}
+                            </td>
+                            <td>
+                            OPERARION
+                            </td>
+                        </tr>
+                        <tr id = "listcontentrow" ng-repeat="row in listcontent.data" ng-controller="listcontentrow">
+                            <td ng-repeat="column in conf.columns" ng-show="column.isShow">
+                                {{ row[column.index] }}
+                            </td>
+                            <td>
+                                <button ng-disabled="disabled" ng-click="detail()">DETAIL</button>
+                                <button ng-disabled="disabled" ng-click="update()">UPDATE</button>
+                                <button ng-disabled="disabled" ng-click="delete()">DELETE</button>
+                            </td>
+                        </tr>
+                        <script>
+                            app.controller(
+                                "listcontentrow",
+                                function($scope, $rootScope, $http) {
+                                    $scope.detail = function() {
+                                        data = [];
+                                        query = {};
+                                        console.log("detail...");
+                                        for (var i=0; i<$scope.conf.columns.length; i++) {
+                                            if ($scope.conf.columns[i].isShow) {
+                                                data.push($scope.conf.columns[i].id);
+                                                }
+                                            if ($scope.conf.columns[i].isPrimaryKey) {
+                                                query[$scope.conf.columns[i].id] = $scope.row[$scope.conf.columns[i].index];
+                                                }
+                                            }
+                                        url = "./detail.jsp?table=" + $scope.conf.table + "&data=" + JSON.stringify(data) + "&query=" + JSON.stringify(query) + "&begin=1&end=1";
+                                        //url = "./detail.json"
+                                        console.log("url" + url);
+                                        //$scope.disabled = true;
+                                        //$http.get(url).success(
+                                        //    function(response) {
+                                        //        $scope.disabled = false;
+                                        //        $rootScope.content = response;
+                                        //        }
+                                        //    );
+                                        }
+                                    }
+                                )
+                        </script>
+                    </table>
+                </div>
+                <div id="listcontrol">
+
+                </div>
+            </div>
+            <div id="detail">
+                <div id="detailtitle">
+
+                </div>
+                <div id="detailcontent">
+
+                </div>
+                <div id="detailcontrol">
+
+                </div>
+            </div>
+        </div>
+        <script>
+            app.controller(
+                "main", 
+                function($scope, $http) {
+                    $http.get("./table.json").success(
+                        function(response) {
+                            $scope.conf = response;
+                            $scope.isListShow = true;
+                            }
+                        );
+                    }
+                );
+    </script>
+    </body>
+</html>
