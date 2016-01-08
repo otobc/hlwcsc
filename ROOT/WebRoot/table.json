@@ -12,8 +12,8 @@
             "name":"col1",
             "isShow":true,
             "isPrimaryKey":true,
-            "isNull":true,
-            "type":0,
+            "isNull":false,
+            "type":1,
             "length":10,
             "control":0,
             "check":

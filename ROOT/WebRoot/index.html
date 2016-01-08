@@ -3,61 +3,54 @@
     <head>
         <meta charset="utf-8">
         <script src="./angular.min.js"></script> 
-        <script src="./genconf.js"></script> 
+        <script src="./easyconf.js"></script> 
     </head>
     <body>
-        <div id="main" ng-app="admin" ng-controller="main">
+        <div id="main" ng-show="easyconf.isInit" ng-app="admin" ng-controller="main">
             <script>
                 var app = angular.module("admin", []);
-                var subtitles = ['LIST', 'DETAIL', 'UPDATE', 'NEW'];
+                // table definition
+                var confUrl = "./table.json";
             </script>
-            <div id="listtitle">
-                <h1>{{ conf.title }} {{ subtitle }}</h1>
+            <div ng-cloak id="listtitle">
+                <h1>{{ easyconf.conf.title }} {{ easyconf.getSubTitle() }}</h1>
             </div>
-            <div id="list" ng-show="view==0">
+            <div id="list" ng-show="easyconf.isListView()">
                 <div id="listquery" ng-controller="listquery">
                     <table>
-                        <tr ng-repeat="column in conf.columns" ng-show="column.isSelect">
-                            <td>{{ column.name }}</td>
-                            <td><input type=text ng-disabled="disabled" ng-model="query[column.id]"></td>
+                        <tr ng-repeat="column in easyconf.conf.columns" ng-show="column.isSelect">
+                            <td ng-cloak>{{ column.name }}</td>
+                            <td><input type=text ng-disabled="easyconf.disabled" ng-model="query[column.id]"></td>
                         </tr>
                         <tr>
-                            <td><button ng-disabled="disabled" ng-click="search()">SEARCH</button></td>
-                            <td><button ng-disabled="disabled" ng-click="new()">NEW</button></td>
+                            <td><button ng-disabled="easyconf.disabled" ng-click="search()">SEARCH</button></td>
+                            <td><button ng-disabled="easyconf.disabled" ng-click="new()">NEW</button></td>
                         </tr>
                     </table>
                 </div>
                 <script>
                     app.controller(
                         "listquery",
-                        function($scope, $rootScope, $http) {
+                        function($scope, $http) {
                             $scope.query = {};
                             $scope.search = function() {
-                                data = [];
                                 console.log("search...");
-                                for (var i=0; i<$rootScope.conf.columns.length; i++) {
-                                    if ($rootScope.conf.columns[i].isShow) {
-                                        data.push($rootScope.conf.columns[i].id);
-                                    }
-                                }
-                                //url = "./list.jsp?table=" + $rootScope.conf.table + "&data=" + JSON.stringify(data) + "&query=" + JSON.stringify($scope.query);
-                                //range = "&begin=0&end=" + $rootScope.conf.count;
+                                data = easyconf.getShowCol();
+                                url = easyconf.formatListHomeUrl(data, $scope.query);
                                 url = "./list.json";
-                                range = "";
-                                $rootScope.queryurl = url;
-                                console.log("url" + url + range);
-                                $rootScope.disabled = true;
-                                $http.get(url+range).success(
+                                console.log("[url]" + url);
+                                easyconf.lock();
+                                $http.get(url).success(
                                     function(response) {
-                                        $rootScope.disabled = false;
-                                        $rootScope.listcontent = response.data;
+                                        easyconf.listcontent = response.data;
+                                        easyconf.unLock();
                                     }
                                 );
                             }
                             $scope.new = function() {
-                                $rootScope.detailcontent = {};
-                                $rootScope.view = 3;
-                                $rootScope.subtitle = subtitles[$rootScope.view];
+                                easyconf.detailcontent = {};
+                                easyconf.view = 3; // NEW
+                                easyconf.allCheck();
                             }
                         }
                     )
@@ -65,94 +58,63 @@
                 <div id="listcontent">
                     <table>
                         <tr>
-                            <td ng-repeat="column in conf.columns" ng-show="column.isShow">
+                            <td ng-cloak ng-repeat="column in easyconf.conf.columns" ng-show="column.isShow">
                                 {{ column.name }}
                             </td>
                             <td>
                             OPERARION
                             </td>
                         </tr>
-                        <tr id = "listcontentrow" ng-repeat="row in listcontent" ng-controller="listcontentrow">
-                            <td ng-repeat="column in conf.columns" ng-show="column.isShow">
-                                {{ column.control < 2 ? row[column.index] : row[column.index] + "-" + candidate[column.id][row[column.index]] }}
+                        <tr id = "listcontentrow" ng-repeat="row in easyconf.listcontent" ng-controller="listcontentrow">
+                            <td ng-cloak ng-repeat="column in easyconf.conf.columns" ng-show="column.isShow">
+                                {{ easyconf.formatListContent(row, column) }}
                             </td>
                             <td>
-                                <button ng-disabled="disabled" ng-click="detail()">DETAIL</button>
-                                <button ng-disabled="disabled" ng-click="update()">UPDATE</button>
-                                <button ng-disabled="disabled" ng-click="delete()">DELETE</button>
+                                <button ng-disabled="easyconf.disabled" ng-click="detail()">DETAIL</button>
+                                <button ng-disabled="easyconf.disabled" ng-click="update()">UPDATE</button>
+                                <button ng-disabled="easyconf.disabled" ng-click="delete()">DELETE</button>
                             </td>
                         </tr>
                         <script>
                             app.controller(
                                 "listcontentrow",
-                                function($scope, $rootScope, $http) {
-                                    $scope.detail = function() {
-                                        data = [];
-                                        query = {};
-                                        console.log("detail...");
-                                        for (var i=0; i<$rootScope.conf.columns.length; i++) {
-                                            data.push($rootScope.conf.columns[i].id);
-                                            if ($rootScope.conf.columns[i].isPrimaryKey) {
-                                                query[$rootScope.conf.columns[i].id] = $scope.row[$rootScope.conf.columns[i].index];
-                                            }
-                                        }
-                                        //url = "./detail.jsp?table=" + $rootScope.conf.table + "&data=" + JSON.stringify(data) + "&query=" + JSON.stringify(query) + "&begin=1&end=1";
+                                function($scope, $http) {
+                                    detail = function(view) {
+                                        query = easyconf.getPKVFromList($scope.row);
+                                        url = easyconf.formatDetailUrl(query);
                                         url = "./detail.json"
-                                        console.log("url" + url);
-                                        $rootScope.disabled = true;
+                                        console.log("[url]" + url);
+                                        easyconf.lock();
                                         $http.get(url).success(
                                             function(response) {
-                                                $rootScope.disabled = false;
-                                                $rootScope.detailcontent = {};
-                                                for (var i=0; i<$rootScope.conf.columns.length; i++) {
-                                                    $rootScope.detailcontent[$rootScope.conf.columns[i].id] = response.data[0][$rootScope.conf.columns[i].index];
+                                                easyconf.setDetailContent(response.data[0])
+                                                easyconf.view = view; 
+                                                if (view == 2) {
+                                                    easyconf.allCheck();
                                                 }
-                                                $rootScope.view = 1;
-                                                $rootScope.subtitle = subtitles[$rootScope.view];
+                                                easyconf.unLock();
                                             }
                                         );
+                                    }
+                                    $scope.detail = function() {
+                                        console.log("detail...");
+                                        detail(1);
                                     }
                                     $scope.update = function() {
-                                        data = [];
-                                        query = {};
                                         console.log("update...");
-                                        for (var i=0; i<$rootScope.conf.columns.length; i++) {
-                                            data.push($rootScope.conf.columns[i].id);
-                                            if ($rootScope.conf.columns[i].isPrimaryKey) {
-                                                query[$rootScope.conf.columns[i].id] = $scope.row[$rootScope.conf.columns[i].index];
-                                            }
-                                        }
-                                        //url = "./detail.jsp?table=" + $rootScope.conf.table + "&data=" + JSON.stringify(data) + "&query=" + JSON.stringify(query) + "&begin=1&end=1";
-                                        url = "./detail.json"
-                                        console.log("url" + url);
-                                        $rootScope.disabled = true;
-                                        $http.get(url).success(
-                                            function(response) {
-                                                $rootScope.disabled = false;
-                                                $rootScope.detailcontent = {};
-                                                for (var i=0; i<$rootScope.conf.columns.length; i++) {
-                                                    $rootScope.detailcontent[$rootScope.conf.columns[i].id] = response.data[0][$rootScope.conf.columns[i].index];
-                                                }
-                                                $rootScope.view = 2;
-                                                $rootScope.subtitle = subtitles[$rootScope.view];
-                                            }
-                                        );
+                                        detail(2);
                                     }
                                     $scope.delete = function() {
-                                        query = {};
                                         console.log("delete...");
-                                        for (var i=0; i<$rootScope.conf.columns.length; i++) {
-                                            if ($rootScope.conf.columns[i].isPrimaryKey) {
-                                                query[$rootScope.conf.columns[i].id] = $scope.row[$rootScope.conf.columns[i].index];
-                                            }
-                                        }
-                                        //url = "./delete.jsp?table=" + $rootScope.conf.table +  "&query=" + JSON.stringify(query);
+                                        query = easyconf.getPKVFromList($scope.row);
+                                        url = easyconf.formatDeleteUrl(query);
                                         url = "./OK.json"
-                                        console.log("url" + url);
-                                        $rootScope.disabled = true;
+                                        console.log("[url]" + url);
+                                        easyconf.lock();
                                         $http.get(url).success(
                                             function(response) {
-                                                $rootScope.disabled = false;
+                                                easyconf.fresh();
+                                                easyconf.unLock();
                                             }
                                         );
                                     }
@@ -161,159 +123,113 @@
                         </script>
                     </table>
                 </div>
-                <div id="listcontrol" ng-show="isDefined(queryurl)" ng-controller="listcontrol">
-                    <button ng-disabled="disabled" ng-click="prev()">PREV</button>
-                    <button ng-disabled="disabled" ng-click="next()">NEXT</button>
-                    <input type=text ng-disabled="disabled" ng-model="page">
-                    <button ng-disabled="disabled || !(floor(page) == page && page > 0)" ng-click="go()">GO</button>
+                <div id="listcontrol" ng-show="easyconf.isSearched()" ng-controller="listcontrol">
+                    <span ng-cloak>{{ easyconf.getCurPage() }}</span>
+                    <button ng-disabled="easyconf.disabled" ng-click="fresh()">FRESH</button>
+                    <button ng-disabled="easyconf.disabled" ng-click="prev()">PREV</button>
+                    <button ng-disabled="easyconf.disabled" ng-click="next()">NEXT</button>
+                    <input type=text ng-disabled="easyconf.disabled" ng-model="page">
+                    <button ng-disabled="easyconf.disabled || !easyconf.isPstInt(page)" ng-click="go()">GO</button>
                 </div>
                 <script>
                     app.controller(
                         "listcontrol", 
-                        function($scope, $rootScope, $http) {
-                            $scope.prev = function() {
-                                if (($rootScope.cursor - $rootScope.conf.count) < 0) {
-                                    $rootScope.cursor = 0;
-                                }
-                                else {
-                                    $rootScope.cursor -= $rootScope.conf.count;
-                                }
-                                //range = "&begin=" + $rootScope.cursor + "&end=" + ($rootScope.cursor + $rootScope.conf.count);
-                                range = "";
-                                $rootScope.disabled = true;
-                                $http.get($scope.queryurl+range).success(
+                        function($scope, $http) {
+                            jump = function() {
+                                url = easyconf.formatListNewUrl()
+                                url = "./list.json";
+                                console.log("[url]" + url);
+                                easyconf.lock();
+                                $http.get(url).success(
                                     function(response) {
-                                        $rootScope.disabled = false;
-                                        $rootScope.listcontent = response.data;
+                                        easyconf.listcontent = response.data;
+                                        easyconf.unLock();
                                     }
                                 );
+                            }
+                            $scope.prev = function() {
+                                console.log("prev...");
+                                easyconf.setPrevCursor();
+                                jump();
                             }
                             $scope.next = function() {
-                                $rootScope.cursor += $rootScope.conf.count;
-                                //range = "&begin=" + $rootScope.cursor + "&end=" + ($rootScope.cursor + $rootScope.conf.count);
-                                range = "";
-                                $rootScope.disabled = true;
-                                $http.get($scope.queryurl+range).success(
-                                    function(response) {
-                                        $rootScope.disabled = false;
-                                        $rootScope.listcontent = response.data;
-                                    }
-                                );
+                                console.log("next...");
+                                easyconf.setNextCursor();
+                                jump();
                             }
                             $scope.go = function() {
-                                $rootScope.cursor = ($scope.page-1) * $rootScope.conf.count;
-                                //range = "&begin=" + $rootScope.cursor + "&end=" + ($rootScope.cursor + $rootScope.conf.count);
-                                range = "";
-                                $rootScope.disabled = true;
-                                $http.get($scope.queryurl+range).success(
-                                    function(response) {
-                                        $rootScope.disabled = false;
-                                        $rootScope.listcontent = response.data;
-                                    }
-                                );
+                                console.log("go...");
+                                easyconf.setGoCursor($scope.page);
+                                jump();
                             }
+                            $scope.fresh = function() {
+                                console.log("fresh...");
+                                jump();
+                            }
+                            easyconf.fresh = $scope.fresh;
                         }
                     );
                 </script>
             </div>
-            <div id="detail" ng-show="view>0" ng-controller="detail">
+            <div id="detail" ng-show="!easyconf.isListView()" ng-controller="detail">
                 <table>
-                    <tr ng-repeat="column in conf.columns" ng-controller="detailcontentrow">
-                        <td>{{ column.name }}</td>
+                    <tr ng-repeat="column in easyconf.conf.columns" ng-controller="detailcontentrow">
+                        <td ng-cloak>{{ column.name }}</td>
                         <td>
-                            <input type=text ng-show="column.control==0" ng-disabled="disabled || view < 2 || (view == 2 && column.isPrimaryKey)" ng-model="detailcontent[column.id]">
-                            <input type=radio ng-show="column.control==1" ng-disabled="disabled || view < 2 || (view == 2 && column.isPrimaryKey)" ng-model="detailcontent[column.id]">
-                            <select ng-show="column.control==2" ng-disabled="disabled || view == 1 || (view == 2 && column.isPrimaryKey)" ng-options="c.key as c.value for c in column.range" ng-model=detailcontent[column.id]>
+                            <input type=text ng-if="easyconf.isColText(column)" ng-disabled="easyconf.disabled || easyconf.isDetailDisable(column)" ng-change="change()" ng-model="easyconf.detailcontent[column.id]">
+                            <input type=radio ng-if="easyconf.isColRadio(column)" ng-disabled="easyconf.disabled || easyconf.isDetailDisable(column)" ng-change="change()" ng-model="easyconf.detailcontent[column.id]">
+                            <select ng-if="easyconf.isColCbox(column)" ng-disabled="easyconf.disabled || easyconf.isDetailDisable(column)" ng-change="change()" ng-options="c.key as c.value for c in column.range" ng-model=easyconf.detailcontent[column.id]>
                         </td>
-                        <td ng-show="view>1">
-                            {{ check(column) ? "OK" : errmsg[column.id] }}
+                        <td ng-cloak ng-show="easyconf.isMsgShow()">
+                            {{ easyconf.errmsg[column.id] }}
                         </td>
                     </tr>
                     <script>
                         app.controller(
                             "detailcontentrow", 
-                            function($scope, $rootScope, $http) {
-                                $scope.check = function(column) {
-                                    var value = $rootScope.detailcontent[column.id];
-                                    console.log(column.id, value);
-                                    if (!$rootScope.isDefined(value) || String(value).length == 0) {
-                                            if (!column.isNull) {
-                                                $rootScope.err[column.id] = false;
-                                                $rootScope.errmsg[column.id] = "NOT NULL";
-                                                return false;
-                                            }
-                                    }
-                                    else
-                                    {
-                                        switch (column.type) {
-                                            case 0://String
-                                                if (!$rootScope.isString(value)) {
-                                                    $rootScope.err[column.id] = false;
-                                                    $rootScope.errmsg[column.id] = "MUST INPUT STRING";
-                                                    return false;
-                                                }
-                                                break;
-                                            case 1://Integer
-                                                if ($rootScope.floor(value) != value) {
-                                                    $rootScope.err[column.id] = false;
-                                                    $rootScope.errmsg[column.id] = "MUST INPUT INTEGER";
-                                                    return false;
-                                                }
-                                                break;
-                                            case 2://Double
-                                                if (isNaN(value)) {
-                                                    $rootScope.err[column.id] = false;
-                                                    $rootScope.errmsg[column.id] = "MUST INPUT NUMBER";
-                                                    return false;
-                                                }
-                                                break;
-                                            case 3://Boolean
-                                                if (column.control != 1) {
-                                                    $rootScope.err[column.id] = false;
-                                                    $rootScope.errmsg[column.id] = "TYPE ERROR";
-                                                    return false;
-                                                }
-                                            case 4://Date
-                                                if (!isDate(value)) {
-                                                    $rootScope.err[column.id] = false;
-                                                    $rootScope.errmsg[column.id] = "MUST INPUT DATE:[YYYY-MM-DD hh:mm:ss.ms]";
-                                                    return false;
-                                                }
-                                            default:
-                                                $rootScope.err[column.id] = false;
-                                                $rootScope.errmsg[column.id] = "TYPE ERROR";
-                                                return false;
-                                                break;
-                                        }
-
-                                        for (var i=0; i<column.check.length; i++) {
-                                            shell = column.check[i].funcname + "(\"" + value + "\"";
-                                            for (var j=0; j<column.check[i].argument.length; j++) {
-                                                arg = $rootScope.detailcontent[column.check[i].argument[j]];
-                                                if (!$rootScope.isDefined(arg)) {
-                                                    arg = "";
-                                                }
-                                                shell += ", \"" + arg + "\"";
-                                            }
-                                            shell += ")";
-                                            console.log("shell" + shell);
-                                            if (!eval(shell)) {
-                                                $rootScope.err[column.id] = false;
-                                                $rootScope.errmsg[column.id] = column.check[i].errmsg;
-                                                return false;
-                                            }
+                            function($scope, $http) {
+                                $scope.change = function() {
+                                    if (easyconf.isBlank($scope.column)) {
+                                        if (!easyconf.checkNull($scope.column)) {
+                                            return false;
                                         }
                                     }
+                                    else {
+                                        if(!easyconf.checkType($scope.column)) {
+                                            return false;
+                                        }
 
-                                    $rootScope.err[column.id] = true;
+                                        if(!easyconf.selfCheck($scope.column)) {
+                                            return false;
+                                        }
+
+                                        if ($scope.column.isPrimaryKey) {
+                                            query = easyconf.getDetailPKV();
+                                            url = easyconf.formatIsUniqueUrl(query);
+                                            url = "./OK.json"
+                                            console.log("[url]" + url);
+                                            easyconf.lock();
+                                            $http.get(url).success(
+                                                function(response) {
+                                                    if (response["result"] != "00") {
+                                                        easyconf.setUniqueError();
+                                                        return false;
+                                                    }
+                                                    easyconf.unLock();
+                                                }
+                                            );
+                                        }
+                                    }
+                                    easyconf.setOK($scope.column);
                                     return true;
                                 }
+                                easyconf.check[$scope.column.id] = $scope.change;
                             }
                         );
                     </script>
                     <tr>
-                        <td><button ng-disabled="disabled" ng-click="back()">RETURN</button></td>
-                        <td><button ng-show="view > 1" ng-disabled="disabled || !all(err)" ng-click="commit()">COMMIT</button></td>
+                        <td><button ng-disabled="easyconf.disabled" ng-click="back()">RETURN</button></td>
+                        <td><button ng-show="easyconf.isCommitShow()" ng-disabled="easyconf.disabled || !easyconf.allOK()" ng-click="commit()">COMMIT</button></td>
                     </tr>
                 </table>
             </div>
@@ -321,51 +237,27 @@
                 app.controller(
                     "detail", 
                     function($scope, $rootScope, $http) {
-                        $rootScope.err = {};
-                        $rootScope.errmsg = {};
                         $scope.back = function() {
-                            $rootScope.view = 0;
-                            $rootScope.subtitle = subtitles[$rootScope.view];
-                        }
-                        $scope.all = function(err) {
-                            var i = 0;
-                            for (k in err) {
-                                if (!err[k]) {
-                                    return false;
-                                }
-                                i += 1;
-                            }
-                            if (i == 0) {
-                                return false;
-                            }
-                            else {
-                                return true;
-                            }
+                            easyconf.view = 0; //LIST
+                            easyconf.fresh();
                         }
                         $scope.commit = function() {
-                            url = "./commit.jsp?table=" + $rootScope.conf.table ;
-                            query = {};
-                            if ($rootScope.view == 2) {
-                                for (var i=0; i<$rootScope.conf.columns.length; i++) {
-                                    if ($rootScope.conf.columns[i].isPrimaryKey) {
-                                        query[$rootScope.conf.columns[i].id] = $rootScope.detailcontent[$rootScope.conf.columns[i].id];
-                                    }
-                                }
-                                //url += "&dest=0" + "&query=" + JSON.stringify(query);
+                            query = easyconf.getDetailPKV();
+                            if (easyconf.isUpdateView()) {
+                                url = easyconf.formatUpdateCommitUrl(query);
                             }
-                            else if ($rootScope.view == 3) {
-                                //url += "&dest=1"
+                            else if (easyconf.isNewView()) {
+                                url = easyconf.formatNewCommitUrl();
                             }
-                            //url += "&data=" + JSON.stringify(query);
                             url = "./OK.json"
-                            console.log("url" + url);
-                            $rootScope.disabled = true;
+                            console.log("[url]" + url);
+                            easyconf.lock();
                             $http.get(url).success(
                                 function(response) {
-                                    $rootScope.disabled = false;
-                                    if ($rootScope.view == 3) {
-                                        $rootScope.detailcontent = {};
+                                    if (easyconf.isNewView()) {
+                                        easyconf.detailcontent = {};
                                     }
+                                    easyconf.unLock();
                                 }
                             );
                         }
@@ -376,29 +268,13 @@
         <script>
             app.controller(
                 "main", 
-                function($scope, $rootScope, $http) {
-                    $http.get("./table.json").success(
+                function($scope, $http) {
+                    $scope.easyconf = easyconf;
+                    $http.get(confUrl).success(
                         function(response) {
-                            $rootScope.conf = response;
-                            $rootScope.listcontent = [];
-                            $rootScope.detailcontent = {};
-                            $rootScope.view = 0;
-                            $rootScope.subtitle = subtitles[$rootScope.view];
-                            $rootScope.cursor = 0;
-                            $rootScope.candidate = {};
-                            $rootScope.floor = Math.floor;
-                            $rootScope.isDefined = angular.isDefined;
-                            $rootScope.isString = angular.isString;
-                            $rootScope.isNumber = angular.isNumber;
-                            for (var i=0; i<$rootScope.conf.columns.length; i++) {
-                                if ($rootScope.conf.columns[i].control == 2) {
-                                    c = {};
-                                    for (var j=0; j<$rootScope.conf.columns[i].range.length; j++) {
-                                        c[$rootScope.conf.columns[i].range[j].key] = $rootScope.conf.columns[i].range[j].value;
-                                    }
-                                    $rootScope.candidate[$rootScope.conf.columns[i].id] = c;
-                                }
-                            }
+                            easyconf.conf = response;
+                            easyconf.setCandidate();
+                            easyconf.isInit = true;
                         }
                     );
                 }
