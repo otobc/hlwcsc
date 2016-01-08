@@ -3,6 +3,7 @@
     <head>
         <meta charset="utf-8">
         <script src="./angular.min.js"></script> 
+        <script src="./genconf.js"></script> 
     </head>
     <body>
         <div id="main" ng-app="admin" ng-controller="main">
@@ -34,26 +35,27 @@
                             $scope.search = function() {
                                 data = [];
                                 console.log("search...");
-                                for (var i=0; i<$scope.conf.columns.length; i++) {
-                                    if ($scope.conf.columns[i].isShow) {
-                                        data.push($scope.conf.columns[i].id);
+                                for (var i=0; i<$rootScope.conf.columns.length; i++) {
+                                    if ($rootScope.conf.columns[i].isShow) {
+                                        data.push($rootScope.conf.columns[i].id);
                                     }
                                 }
-                                //url = "./list.jsp?table=" + $scope.conf.table + "&data=" + JSON.stringify(data) + "&query=" + JSON.stringify($scope.query);
-                                //range = "&begin=0&end=" + $scope.conf.count;
+                                //url = "./list.jsp?table=" + $rootScope.conf.table + "&data=" + JSON.stringify(data) + "&query=" + JSON.stringify($scope.query);
+                                //range = "&begin=0&end=" + $rootScope.conf.count;
                                 url = "./list.json";
                                 range = "";
                                 $rootScope.queryurl = url;
                                 console.log("url" + url + range);
-                                $scope.disabled = true;
+                                $rootScope.disabled = true;
                                 $http.get(url+range).success(
                                     function(response) {
-                                        $scope.disabled = false;
+                                        $rootScope.disabled = false;
                                         $rootScope.listcontent = response.data;
                                     }
                                 );
                             }
                             $scope.new = function() {
+                                $rootScope.detailcontent = {};
                                 $rootScope.view = 3;
                                 $rootScope.subtitle = subtitles[$rootScope.view];
                             }
@@ -88,123 +90,127 @@
                                         data = [];
                                         query = {};
                                         console.log("detail...");
-                                        for (var i=0; i<$scope.conf.columns.length; i++) {
-                                            data.push($scope.conf.columns[i].id);
-                                            if ($scope.conf.columns[i].isPrimaryKey) {
-                                                query[$scope.conf.columns[i].id] = $scope.row[$scope.conf.columns[i].index];
+                                        for (var i=0; i<$rootScope.conf.columns.length; i++) {
+                                            data.push($rootScope.conf.columns[i].id);
+                                            if ($rootScope.conf.columns[i].isPrimaryKey) {
+                                                query[$rootScope.conf.columns[i].id] = $scope.row[$rootScope.conf.columns[i].index];
                                             }
                                         }
-                                        //url = "./detail.jsp?table=" + $scope.conf.table + "&data=" + JSON.stringify(data) + "&query=" + JSON.stringify(query) + "&begin=1&end=1";
+                                        //url = "./detail.jsp?table=" + $rootScope.conf.table + "&data=" + JSON.stringify(data) + "&query=" + JSON.stringify(query) + "&begin=1&end=1";
                                         url = "./detail.json"
                                         console.log("url" + url);
-                                        $scope.disabled = true;
+                                        $rootScope.disabled = true;
                                         $http.get(url).success(
                                             function(response) {
-                                                $scope.disabled = false;
-                                                $rootScope.detailcontent = response.data[0];
+                                                $rootScope.disabled = false;
+                                                $rootScope.detailcontent = {};
+                                                for (var i=0; i<$rootScope.conf.columns.length; i++) {
+                                                    $rootScope.detailcontent[$rootScope.conf.columns[i].id] = response.data[0][$rootScope.conf.columns[i].index];
+                                                }
                                                 $rootScope.view = 1;
                                                 $rootScope.subtitle = subtitles[$rootScope.view];
-                                                }
-                                            );
+                                            }
+                                        );
                                     }
                                     $scope.update = function() {
                                         data = [];
                                         query = {};
                                         console.log("update...");
-                                        for (var i=0; i<$scope.conf.columns.length; i++) {
-                                            data.push($scope.conf.columns[i].id);
-                                            if ($scope.conf.columns[i].isPrimaryKey) {
-                                                query[$scope.conf.columns[i].id] = $scope.row[$scope.conf.columns[i].index];
+                                        for (var i=0; i<$rootScope.conf.columns.length; i++) {
+                                            data.push($rootScope.conf.columns[i].id);
+                                            if ($rootScope.conf.columns[i].isPrimaryKey) {
+                                                query[$rootScope.conf.columns[i].id] = $scope.row[$rootScope.conf.columns[i].index];
                                             }
                                         }
-                                        //url = "./detail.jsp?table=" + $scope.conf.table + "&data=" + JSON.stringify(data) + "&query=" + JSON.stringify(query) + "&begin=1&end=1";
+                                        //url = "./detail.jsp?table=" + $rootScope.conf.table + "&data=" + JSON.stringify(data) + "&query=" + JSON.stringify(query) + "&begin=1&end=1";
                                         url = "./detail.json"
                                         console.log("url" + url);
-                                        $scope.disabled = true;
+                                        $rootScope.disabled = true;
                                         $http.get(url).success(
                                             function(response) {
-                                                $scope.disabled = false;
-                                                $rootScope.detailcontent = response.data[0];
+                                                $rootScope.disabled = false;
+                                                $rootScope.detailcontent = {};
+                                                for (var i=0; i<$rootScope.conf.columns.length; i++) {
+                                                    $rootScope.detailcontent[$rootScope.conf.columns[i].id] = response.data[0][$rootScope.conf.columns[i].index];
+                                                }
                                                 $rootScope.view = 2;
                                                 $rootScope.subtitle = subtitles[$rootScope.view];
-                                                }
-                                            );
+                                            }
+                                        );
                                     }
                                     $scope.delete = function() {
                                         query = {};
                                         console.log("delete...");
-                                        for (var i=0; i<$scope.conf.columns.length; i++) {
-                                            if ($scope.conf.columns[i].isPrimaryKey) {
-                                                query[$scope.conf.columns[i].id] = $scope.row[$scope.conf.columns[i].index];
+                                        for (var i=0; i<$rootScope.conf.columns.length; i++) {
+                                            if ($rootScope.conf.columns[i].isPrimaryKey) {
+                                                query[$rootScope.conf.columns[i].id] = $scope.row[$rootScope.conf.columns[i].index];
                                             }
                                         }
-                                        //url = "./delete.jsp?table=" + $scope.conf.table +  "&query=" + JSON.stringify(query);
+                                        //url = "./delete.jsp?table=" + $rootScope.conf.table +  "&query=" + JSON.stringify(query);
                                         url = "./OK.json"
                                         console.log("url" + url);
-                                        $scope.disabled = true;
+                                        $rootScope.disabled = true;
                                         $http.get(url).success(
                                             function(response) {
-                                                $scope.disabled = false;
-                                                }
-                                            );
+                                                $rootScope.disabled = false;
+                                            }
+                                        );
                                     }
                                 }
                             )
                         </script>
                     </table>
                 </div>
-                <div id="listcontrol" ng-show="queryurl" ng-controller="listcontrol">
+                <div id="listcontrol" ng-show="isDefined(queryurl)" ng-controller="listcontrol">
                     <button ng-disabled="disabled" ng-click="prev()">PREV</button>
                     <button ng-disabled="disabled" ng-click="next()">NEXT</button>
-                    <input type=text ng-disabled="disabled" ng-change="change()" ng-model="page">
-                    <button ng-disabled="disabled" ng-show="cango" ng-click="go()">GO</button>
+                    <input type=text ng-disabled="disabled" ng-model="page">
+                    <button ng-disabled="disabled || !(floor(page) == page && page > 0)" ng-click="go()">GO</button>
                 </div>
                 <script>
                     app.controller(
                         "listcontrol", 
                         function($scope, $rootScope, $http) {
                             $scope.prev = function() {
-                                if (($rootScope.cursor - $scope.conf.count) < 0) {
+                                if (($rootScope.cursor - $rootScope.conf.count) < 0) {
                                     $rootScope.cursor = 0;
                                 }
                                 else {
-                                    $rootScope.cursor -= $scope.conf.count;
+                                    $rootScope.cursor -= $rootScope.conf.count;
                                 }
-                                //range = "&begin=" + $rootScope.cursor + "&end=" + ($rootScope.cursor + $scope.conf.count);
+                                //range = "&begin=" + $rootScope.cursor + "&end=" + ($rootScope.cursor + $rootScope.conf.count);
                                 range = "";
+                                $rootScope.disabled = true;
                                 $http.get($scope.queryurl+range).success(
                                     function(response) {
-                                        $scope.conf = response;
+                                        $rootScope.disabled = false;
+                                        $rootScope.listcontent = response.data;
                                     }
                                 );
                             }
                             $scope.next = function() {
-                                $rootScope.cursor += $scope.conf.count;
-                                //range = "&begin=" + $rootScope.cursor + "&end=" + ($rootScope.cursor + $scope.conf.count);
+                                $rootScope.cursor += $rootScope.conf.count;
+                                //range = "&begin=" + $rootScope.cursor + "&end=" + ($rootScope.cursor + $rootScope.conf.count);
                                 range = "";
+                                $rootScope.disabled = true;
                                 $http.get($scope.queryurl+range).success(
                                     function(response) {
-                                        $scope.conf = response;
+                                        $rootScope.disabled = false;
+                                        $rootScope.listcontent = response.data;
                                     }
                                 );
                             }
                             $scope.go = function() {
-                                $rootScope.cursor = ($scope.page-1) * $scope.conf.count;
-                                //range = "&begin=" + $rootScope.cursor + "&end=" + ($rootScope.cursor + $scope.conf.count);
+                                $rootScope.cursor = ($scope.page-1) * $rootScope.conf.count;
+                                //range = "&begin=" + $rootScope.cursor + "&end=" + ($rootScope.cursor + $rootScope.conf.count);
                                 range = "";
+                                $rootScope.disabled = true;
                                 $http.get($scope.queryurl+range).success(
                                     function(response) {
-                                        $scope.conf = response;
+                                        $rootScope.disabled = false;
+                                        $rootScope.listcontent = response.data;
                                     }
                                 );
-                            }
-                            $scope.change = function() {
-                                if (Math.floor($scope.page) == $scope.page && $scope.page > 0) {
-                                    $scope.cango = true;
-                                }
-                                else {
-                                    $scope.cango = false;
-                                }
                             }
                         }
                     );
@@ -215,23 +221,99 @@
                     <tr ng-repeat="column in conf.columns" ng-controller="detailcontentrow">
                         <td>{{ column.name }}</td>
                         <td>
-                            <input type=text ng-show="column.control==0" ng-disabled="disabled || view < 2 || (view == 2 && column.isPrimaryKey)" ng-model="detailcontent[column.index]">
-                            <input type=radio ng-show="column.control==1" ng-disabled="disabled || view < 2 || (view == 2 && column.isPrimaryKey)" ng-model="detailcontent[column.index]">
-                            <select ng-show="column.control==2" ng-disabled="disabled || view == 1 || (view == 2 && column.isPrimaryKey)" ng-options="c.key as c.value for c in column.range" ng-model=detailcontent[column.index]>
-                            <label>{{ errmsg }}</label>
+                            <input type=text ng-show="column.control==0" ng-disabled="disabled || view < 2 || (view == 2 && column.isPrimaryKey)" ng-model="detailcontent[column.id]">
+                            <input type=radio ng-show="column.control==1" ng-disabled="disabled || view < 2 || (view == 2 && column.isPrimaryKey)" ng-model="detailcontent[column.id]">
+                            <select ng-show="column.control==2" ng-disabled="disabled || view == 1 || (view == 2 && column.isPrimaryKey)" ng-options="c.key as c.value for c in column.range" ng-model=detailcontent[column.id]>
+                        </td>
+                        <td ng-show="view>1">
+                            {{ check(column) ? "OK" : errmsg[column.id] }}
                         </td>
                     </tr>
                     <script>
                         app.controller(
                             "detailcontentrow", 
                             function($scope, $rootScope, $http) {
-                                // TODO check
+                                $scope.check = function(column) {
+                                    var value = $rootScope.detailcontent[column.id];
+                                    console.log(column.id, value);
+                                    if (!$rootScope.isDefined(value) || String(value).length == 0) {
+                                            if (!column.isNull) {
+                                                $rootScope.err[column.id] = false;
+                                                $rootScope.errmsg[column.id] = "NOT NULL";
+                                                return false;
+                                            }
+                                    }
+                                    else
+                                    {
+                                        switch (column.type) {
+                                            case 0://String
+                                                if (!$rootScope.isString(value)) {
+                                                    $rootScope.err[column.id] = false;
+                                                    $rootScope.errmsg[column.id] = "MUST INPUT STRING";
+                                                    return false;
+                                                }
+                                                break;
+                                            case 1://Integer
+                                                if ($rootScope.floor(value) != value) {
+                                                    $rootScope.err[column.id] = false;
+                                                    $rootScope.errmsg[column.id] = "MUST INPUT INTEGER";
+                                                    return false;
+                                                }
+                                                break;
+                                            case 2://Double
+                                                if (isNaN(value)) {
+                                                    $rootScope.err[column.id] = false;
+                                                    $rootScope.errmsg[column.id] = "MUST INPUT NUMBER";
+                                                    return false;
+                                                }
+                                                break;
+                                            case 3://Boolean
+                                                if (column.control != 1) {
+                                                    $rootScope.err[column.id] = false;
+                                                    $rootScope.errmsg[column.id] = "TYPE ERROR";
+                                                    return false;
+                                                }
+                                            case 4://Date
+                                                if (!isDate(value)) {
+                                                    $rootScope.err[column.id] = false;
+                                                    $rootScope.errmsg[column.id] = "MUST INPUT DATE:[YYYY-MM-DD hh:mm:ss.ms]";
+                                                    return false;
+                                                }
+                                            default:
+                                                $rootScope.err[column.id] = false;
+                                                $rootScope.errmsg[column.id] = "TYPE ERROR";
+                                                return false;
+                                                break;
+                                        }
+
+                                        for (var i=0; i<column.check.length; i++) {
+                                            shell = column.check[i].funcname + "(\"" + value + "\"";
+                                            for (var j=0; j<column.check[i].argument.length; j++) {
+                                                arg = $rootScope.detailcontent[column.check[i].argument[j]];
+                                                if (!$rootScope.isDefined(arg)) {
+                                                    arg = "";
+                                                }
+                                                shell += ", \"" + arg + "\"";
+                                            }
+                                            shell += ")";
+                                            console.log("shell" + shell);
+                                            if (!eval(shell)) {
+                                                $rootScope.err[column.id] = false;
+                                                $rootScope.errmsg[column.id] = column.check[i].errmsg;
+                                                return false;
+                                            }
+                                        }
+                                    }
+
+                                    $rootScope.err[column.id] = true;
+                                    return true;
+                                }
                             }
                         );
                     </script>
                     <tr>
                         <td><button ng-disabled="disabled" ng-click="back()">RETURN</button></td>
-                        <td><button ng-show="view > 1" ng-disabled="disabled" ng-click="commit()">COMMIT</button></td>
+                        <td><button ng-show="view > 1" ng-disabled="disabled || !all(err)" ng-click="commit()">COMMIT</button></td>
                     </tr>
                 </table>
             </div>
@@ -239,11 +321,54 @@
                 app.controller(
                     "detail", 
                     function($scope, $rootScope, $http) {
+                        $rootScope.err = {};
+                        $rootScope.errmsg = {};
                         $scope.back = function() {
                             $rootScope.view = 0;
-                            $rootScope.subtitle = subtitles[$scope.view];
+                            $rootScope.subtitle = subtitles[$rootScope.view];
                         }
-                        // TODO commit
+                        $scope.all = function(err) {
+                            var i = 0;
+                            for (k in err) {
+                                if (!err[k]) {
+                                    return false;
+                                }
+                                i += 1;
+                            }
+                            if (i == 0) {
+                                return false;
+                            }
+                            else {
+                                return true;
+                            }
+                        }
+                        $scope.commit = function() {
+                            url = "./commit.jsp?table=" + $rootScope.conf.table ;
+                            query = {};
+                            if ($rootScope.view == 2) {
+                                for (var i=0; i<$rootScope.conf.columns.length; i++) {
+                                    if ($rootScope.conf.columns[i].isPrimaryKey) {
+                                        query[$rootScope.conf.columns[i].id] = $rootScope.detailcontent[$rootScope.conf.columns[i].id];
+                                    }
+                                }
+                                //url += "&dest=0" + "&query=" + JSON.stringify(query);
+                            }
+                            else if ($rootScope.view == 3) {
+                                //url += "&dest=1"
+                            }
+                            //url += "&data=" + JSON.stringify(query);
+                            url = "./OK.json"
+                            console.log("url" + url);
+                            $rootScope.disabled = true;
+                            $http.get(url).success(
+                                function(response) {
+                                    $rootScope.disabled = false;
+                                    if ($rootScope.view == 3) {
+                                        $rootScope.detailcontent = {};
+                                    }
+                                }
+                            );
+                        }
                     }
                 );
             </script>
@@ -255,10 +380,16 @@
                     $http.get("./table.json").success(
                         function(response) {
                             $rootScope.conf = response;
+                            $rootScope.listcontent = [];
+                            $rootScope.detailcontent = {};
                             $rootScope.view = 0;
-                            $rootScope.subtitle = subtitles[$scope.view];
+                            $rootScope.subtitle = subtitles[$rootScope.view];
                             $rootScope.cursor = 0;
                             $rootScope.candidate = {};
+                            $rootScope.floor = Math.floor;
+                            $rootScope.isDefined = angular.isDefined;
+                            $rootScope.isString = angular.isString;
+                            $rootScope.isNumber = angular.isNumber;
                             for (var i=0; i<$rootScope.conf.columns.length; i++) {
                                 if ($rootScope.conf.columns[i].control == 2) {
                                     c = {};

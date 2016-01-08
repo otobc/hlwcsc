@@ -12,19 +12,21 @@
             "name":"col1",
             "isShow":true,
             "isPrimaryKey":true,
-            "isNull":false,
+            "isNull":true,
             "type":0,
             "length":10,
             "control":0,
             "check":
             [
                 {
-                    "function1":"function1",
-                    "argument":["col2", "col3"]
+                    "funcname":"testfunc1",
+                    "argument":["col2", "col3"],
+                    "errmsg":"err1"
                 },
                 {
-                    "function":"functiont2",
-                    "argument":["col3"]
+                    "funcname":"testfunc2",
+                    "argument":["col3"],
+                    "errmsg":"err2"
                 }
             ],		
             "isSelect":true,
@@ -58,7 +60,7 @@
             "name":"col3",
             "isShow":true,
             "isPrimaryKey":false,
-            "isNull":false,
+            "isNull":true,
             "type":2,
             "length":10,
             "control":0,
