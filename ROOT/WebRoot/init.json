@@ -7,7 +7,6 @@
     "columns":
     [
         {
-            "index":0,
             "id":"col1",
             "name":"col1",
             "isShow":true,
@@ -30,15 +29,24 @@
                 }
             ],		
             "isSelect":true,
-            "range":[],
-            "default":"col1"
+            "candidate":null,
+            "fixed":
+            [
+            ],
+			"flexible":
+            {
+                "key":null,
+                "value":null,	 
+                "table":null,
+                "where":[]
+            },
+            "dft":"col1"
         },
         {
-            "index":1,
             "id":"col2",
             "name":"col2",
             "isShow":true,
-            "isPrimaryKey":false,
+            "isPrimaryKey":true,
             "isNull":true,
             "type":0,
             "length":10,
@@ -47,15 +55,22 @@
             [
             ],
             "isSelect":true,
-            "range":
+            "candidate":1,
+            "fixed":
             [
-                {"key":"1", "value":"a"}, 
-                {"key":"2", "value":"b"} 
+                {"key":"a", "value":1}, 
+                {"key":"b", "value":2}
             ],
-            "default":"col2"
+			"flexible":
+            {
+                "key":"col1",
+                "value":"col2",	 
+                "table":"rangetable",
+                "where":["col2", "col3"]
+            },
+            "dft":"col2"
         },
         {
-            "index":2,
             "id":"col3",
             "name":"col3",
             "isShow":true,
@@ -68,8 +83,18 @@
             [
             ],
             "isSelect":false,
-            "range":[],
-            "default":3.0
+            "candidate":null,
+            "fixed":
+            [
+            ],
+			"flexible":
+            {
+                "key":null,
+                "value":null,	 
+                "table":null,
+                "where":[]
+            },
+            "dft":3.0
         }
     ]
 }

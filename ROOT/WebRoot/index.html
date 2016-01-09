@@ -10,7 +10,7 @@
             <script>
                 var app = angular.module("admin", []);
                 // table definition
-                var confUrl = "./table.json";
+                var table = "test";
             </script>
             <div ng-cloak id="listtitle">
                 <h1>{{ easyconf.conf.title }} {{ easyconf.getSubTitle() }}</h1>
@@ -24,7 +24,7 @@
                         </tr>
                         <tr>
                             <td><button ng-disabled="easyconf.disabled" ng-click="search()">SEARCH</button></td>
-                            <td><button ng-disabled="easyconf.disabled" ng-click="new()">NEW</button></td>
+                            <td><button ng-disabled="easyconf.disabled" ng-click="insert()">INSERT</button></td>
                         </tr>
                     </table>
                 </div>
@@ -42,20 +42,21 @@
                                 easyconf.lock();
                                 $http.get(url).success(
                                     function(response) {
-                                        easyconf.listcontent = response.data;
+                                        easyconf.setListContent(response.data);
                                         easyconf.unLock();
                                     }
                                 );
                             }
-                            $scope.new = function() {
-                                easyconf.detailcontent = {};
-                                easyconf.view = 3; // NEW
+                            $scope.insert = function() {
+                                easyconf.detailContent = {};
+                                easyconf.keyContent = {};
+                                easyconf.view = 3; // INSERT
                                 easyconf.allCheck();
                             }
                         }
                     )
                 </script>
-                <div id="listcontent">
+                <div id="listContent">
                     <table>
                         <tr>
                             <td ng-cloak ng-repeat="column in easyconf.conf.columns" ng-show="column.isShow">
@@ -65,7 +66,7 @@
                             OPERARION
                             </td>
                         </tr>
-                        <tr id = "listcontentrow" ng-repeat="row in easyconf.listcontent" ng-controller="listcontentrow">
+                        <tr id = "listContentRow" ng-repeat="row in easyconf.listContent" ng-controller="listContentRow">
                             <td ng-cloak ng-repeat="column in easyconf.conf.columns" ng-show="column.isShow">
                                 {{ easyconf.formatListContent(row, column) }}
                             </td>
@@ -77,17 +78,17 @@
                         </tr>
                         <script>
                             app.controller(
-                                "listcontentrow",
+                                "listContentRow",
                                 function($scope, $http) {
                                     detail = function(view) {
-                                        query = easyconf.getPKVFromList($scope.row);
+                                        query = easyconf.getPKV($scope.row);
                                         url = easyconf.formatDetailUrl(query);
                                         url = "./detail.json"
                                         console.log("[url]" + url);
                                         easyconf.lock();
                                         $http.get(url).success(
                                             function(response) {
-                                                easyconf.setDetailContent(response.data[0])
+                                                easyconf.setDetailContent(response.data);
                                                 easyconf.view = view; 
                                                 if (view == 2) {
                                                     easyconf.allCheck();
@@ -106,7 +107,7 @@
                                     }
                                     $scope.delete = function() {
                                         console.log("delete...");
-                                        query = easyconf.getPKVFromList($scope.row);
+                                        query = easyconf.getPKV($scope.row);
                                         url = easyconf.formatDeleteUrl(query);
                                         url = "./OK.json"
                                         console.log("[url]" + url);
@@ -142,7 +143,7 @@
                                 easyconf.lock();
                                 $http.get(url).success(
                                     function(response) {
-                                        easyconf.listcontent = response.data;
+                                        easyconf.setListContent(response.data);
                                         easyconf.unLock();
                                     }
                                 );
@@ -173,12 +174,12 @@
             </div>
             <div id="detail" ng-show="!easyconf.isListView()" ng-controller="detail">
                 <table>
-                    <tr ng-repeat="column in easyconf.conf.columns" ng-controller="detailcontentrow">
+                    <tr ng-repeat="column in easyconf.conf.columns" ng-controller="detailContentRow">
                         <td ng-cloak>{{ column.name }}</td>
                         <td>
-                            <input type=text ng-if="easyconf.isColText(column)" ng-disabled="easyconf.disabled || easyconf.isDetailDisable(column)" ng-change="change()" ng-model="easyconf.detailcontent[column.id]">
-                            <input type=radio ng-if="easyconf.isColRadio(column)" ng-disabled="easyconf.disabled || easyconf.isDetailDisable(column)" ng-change="change()" ng-model="easyconf.detailcontent[column.id]">
-                            <select ng-if="easyconf.isColCbox(column)" ng-disabled="easyconf.disabled || easyconf.isDetailDisable(column)" ng-change="change()" ng-options="c.key as c.value for c in column.range" ng-model=easyconf.detailcontent[column.id]>
+                            <input type=text ng-if="easyconf.isColText(column)" ng-disabled="easyconf.disabled || easyconf.isDetailDisable(column)" ng-change="change()" ng-model="easyconf.detailContent[column.id]">
+                            <input type=radio ng-if="easyconf.isColRadio(column)" ng-disabled="easyconf.disabled || easyconf.isDetailDisable(column)" ng-change="change()" ng-model="easyconf.detailContent[column.id]">
+                            <select ng-if="easyconf.isColCbox(column)" ng-disabled="easyconf.disabled || easyconf.isDetailDisable(column)" ng-focus="focus()" ng-change="change()" ng-options="c.key as c.value for c in easyconf.range[column.id]" ng-model=easyconf.detailContent[column.id]>
                         </td>
                         <td ng-cloak ng-show="easyconf.isMsgShow()">
                             {{ easyconf.errmsg[column.id] }}
@@ -186,9 +187,13 @@
                     </tr>
                     <script>
                         app.controller(
-                            "detailcontentrow", 
+                            "detailContentRow", 
                             function($scope, $http) {
                                 $scope.change = function() {
+                                    //should be the last check
+                                    if($scope.column.isPrimaryKey && !easyconf.checkUnique()) {
+                                        return false;
+                                    }
                                     if (easyconf.isBlank($scope.column)) {
                                         if (!easyconf.checkNull($scope.column)) {
                                             return false;
@@ -199,31 +204,35 @@
                                             return false;
                                         }
 
+                                        if(!easyconf.checkControl($scope.column)) {
+                                            return false;
+                                        }
+
+
                                         if(!easyconf.selfCheck($scope.column)) {
                                             return false;
                                         }
 
-                                        if ($scope.column.isPrimaryKey) {
-                                            query = easyconf.getDetailPKV();
-                                            url = easyconf.formatIsUniqueUrl(query);
-                                            url = "./OK.json"
-                                            console.log("[url]" + url);
-                                            easyconf.lock();
-                                            $http.get(url).success(
-                                                function(response) {
-                                                    if (response["result"] != "00") {
-                                                        easyconf.setUniqueError();
-                                                        return false;
-                                                    }
-                                                    easyconf.unLock();
-                                                }
-                                            );
-                                        }
+
                                     }
                                     easyconf.setOK($scope.column);
                                     return true;
                                 }
                                 easyconf.check[$scope.column.id] = $scope.change;
+                                $scope.focus = function() {
+                                    if (easyconf.isColFlexible($scope.column)) {
+                                        url = easyconf.formatRangeUrl($scope.column);
+                                        url = "./range.json"
+                                        console.log("[url]" + url);
+                                        easyconf.lock();
+                                        $http.get(url).success(
+                                            function(response) {
+                                                easyconf.range[$scope.column.id] = response.data;
+                                                easyconf.unLock();
+                                            }
+                                        );
+                                    }
+                                }
                             }
                         );
                     </script>
@@ -244,18 +253,28 @@
                         $scope.commit = function() {
                             query = easyconf.getDetailPKV();
                             if (easyconf.isUpdateView()) {
-                                url = easyconf.formatUpdateCommitUrl(query);
+                                url = easyconf.formatUpdateUrl(query);
                             }
-                            else if (easyconf.isNewView()) {
-                                url = easyconf.formatNewCommitUrl();
+                            else if (easyconf.isInsertView()) {
+                                url = easyconf.formatInsertUrl();
                             }
-                            url = "./OK.json"
+                            //url = "./OK.json"
+                            url = "./NU.json"
                             console.log("[url]" + url);
                             easyconf.lock();
                             $http.get(url).success(
                                 function(response) {
-                                    if (easyconf.isNewView()) {
-                                        easyconf.detailcontent = {};
+                                    if (response.result == "00") {
+                                        if (easyconf.isInsertView()) {
+                                            easyconf.detailContent = {};
+                                            easyconf.keyContent = {};
+                                        }
+                                    }
+                                    else if (response.result == "01") {
+                                        if (easyconf.isInsertView()) {
+                                            easyconf.setPrimaryKeyContent();
+                                            easyconf.setUniqueError();
+                                        }
                                     }
                                     easyconf.unLock();
                                 }
@@ -266,14 +285,17 @@
             </script>
         </div>
         <script>
+            easyconf.init();
             app.controller(
                 "main", 
                 function($scope, $http) {
                     $scope.easyconf = easyconf;
-                    $http.get(confUrl).success(
+                    url = easyconf.formatInitUrl(table);
+                    url = "./init.json";
+                    $http.get(url).success(
                         function(response) {
                             easyconf.conf = response;
-                            easyconf.setCandidate();
+                            easyconf.setCandidateAndRange();
                             easyconf.isInit = true;
                         }
                     );
