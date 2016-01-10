@@ -1,10 +1,12 @@
-drop table if exists wpindex;
-drop table if exists vertex;
-drop table if exists edge;
-drop table if exists evaluate;
-drop table if exists rawdata;
-drop table if exists wpidxcache;
-drop table if exists experiment;
+create database evaluation_config;
+use evaluation_config;
+#drop table if exists wpindex;
+#drop table if exists vertex;
+#drop table if exists edge;
+#drop table if exists evaluate;
+#drop table if exists rawdata;
+#drop table if exists wpidxcache;
+#drop table if exists experiment;
 
 create table wpindex(
     id		char(8)		not null,

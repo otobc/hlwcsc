@@ -8,12 +8,12 @@ public class DBConnect
 {
 	/*************************************************************/
 	// connect mysql
-	public static Connection connectMySQL(String user, String passwd,
-			String databaseName) throws SQLException, ClassNotFoundException
+	public static Connection connectMySQL(String user, String passwd)
+			throws SQLException, ClassNotFoundException
 	{
 		Class.forName("com.mysql.jdbc.Driver");
 		Connection connection = DriverManager
-				.getConnection("jdbc:mysql://localhost/" + databaseName
+				.getConnection("jdbc:mysql://localhost/evaluation_config"
 						+ "?allowMultiQueries=true", user, passwd);
 		return connection;
 	}
