@@ -3,13 +3,12 @@ var easyconf = new Object({
     subTitles:['LIST', 'DETAIL', 'UPDATE', 'INSERT'],
     msgs:{
         OK:"OK",
-        NN:"NOT NULL",
-        INT:"MUST INPUT INTEGER",
-        DB:"MUST INPUT NUMBER",
-        TP:"TYPE ERROR",
-        DT:"MUST INPUT DATE:[YYYY-MM-DD hh:mm:ss.ms]",
-        NU:"NOT UNIQUE",
-        CB:"MUST INPUT A-Z OR a-z OR 0-9 OR _"
+        NOTNULL:"NOT NULL",
+        INTEGER:"MUST INPUT INTEGER",
+        DOUBLE:"MUST INPUT NUMBER",
+        TYPEERROR:"TYPE ERROR",
+        DATE:"MUST INPUT DATE:[YYYY-MM-DD hh:mm:ss.ms]",
+        NOTUNIQUE:"NOT UNIQUE",
     },
     controls:{
         TEXT:0,
@@ -37,23 +36,215 @@ var easyconf = new Object({
         RANGE:"range"
     },
     dateRE:RegExp("^\\d{4}-(0?[1-9]|1[0-2])-(0?[1-9]|[1-2]\\d|3[0-1]) ([0-1]\\d|2[0-3]):[0-5]\\d:[0-5]\\d\\.\\d{2}$"),
-    cboxRE:RegExp("[A-Za-z0-9_]*"),
     sep:"|",
-    listContent:[],
-    detailContent:{},
-    primaryKeyContent:{},
-    candidate:{},
-    range:{},
-    err:{},
-    errmsg:{},
-    check:{},
-    view:null,
-    cursor:0,
-    queryUrl:null,
 
     // basic function here, pls do not modify them
-    init:function() {
+    init:function(http, table) {
+        this.table = table;
+
+        this.listContent = [];
+        this.detailContent = {};
+        this.primaryKeyContent = {};
+        this.candidate = {};
+        this.range = {};
+        this.err = {};
+        this.errmsg = {};
+        this.check = {};
+        this.view = null;
+        this.cursor = 0;
+        this.queryUrl = null;
         this.view = this.views.LIST;
+
+        url = this.formatInitUrl(table);
+        url = "./init.json";
+        easyconf = this;
+        http.get(url).success(
+            function(response) {
+                easyconf.conf = response;
+                easyconf.setCandidateAndRange();
+                easyconf.isInit = true;
+            }
+        );
+    },
+
+    search:function(http, query) {
+        console.log("search...");
+        data = this.getShowCol();
+        url = this.formatListHomeUrl(data, query);
+        url = "./list.json";
+        console.log("[url]" + url);
+        easyconf = this;
+        this.lock();
+        http.get(url).success(
+            function(response) {
+                easyconf.setListContent(response.data);
+                easyconf.unLock();
+            }
+        );
+    },
+
+    insert:function() {
+        this.detailContent = {};
+        this.keyContent = {};
+        this.view = 3; // INSERT
+        this.allCheck();
+    },
+
+    detail:function(http, row, view) {
+        query = this.getPKV(row);
+        url = this.formatDetailUrl(query);
+        url = "./detail.json"
+        console.log("[url]" + url);
+        easyconf = this;
+        this.lock();
+        http.get(url).success(
+            function(response) {
+                easyconf.setDetailContent(response.data);
+                easyconf.view = view; 
+                if (view == easyconf.views.UPDATE) {
+                    easyconf.allCheck();
+                }
+                easyconf.unLock();
+            }
+        );
+    },
+
+    dlt:function(http, row) {
+        console.log("delete...");
+        query = this.getPKV(row);
+        url = this.formatDeleteUrl(query);
+        url = "./OK.json"
+        console.log("[url]" + url);
+        easyconf = this;
+        this.lock();
+        //http.post(url).success(
+        http.get(url).success(
+            function(response) {
+                easyconf.freshCall();
+                easyconf.unLock();
+            }
+        );
+    },
+
+    jump:function(http) {
+        url = this.formatListNewUrl()
+        url = "./list.json";
+        console.log("[url]" + url);
+        easyconf = this;
+        this.lock();
+        http.get(url).success(
+            function(response) {
+                easyconf.setListContent(response.data);
+                easyconf.unLock();
+            }
+        );
+    },
+
+    prev:function(http) {
+        console.log("prev...");
+        this.setPrevCursor();
+        this.jump(http);
+    },
+
+    next:function(http) {
+        console.log("next...");
+        this.setNextCursor();
+        this.jump(http);
+    },
+
+    go:function(http, page) {
+        console.log("go...");
+        this.setGoCursor(page);
+        this.jump(http);
+    },
+
+    fresh:function(http) {
+        console.log("fresh...");
+        if (this.isSearched()) {
+            this.jump(http);
+        }
+    },
+
+    change:function(column) {
+        //should be the first check
+        if(column.isPrimaryKey && !this.checkUnique()) {
+            return false;
+        }
+        if (this.isBlank(column)) {
+            if (!this.checkNull(column)) {
+                return false;
+            }
+        }
+        else {
+            if(!this.checkType(column)) {
+                return false;
+            }
+
+            if(!this.selfCheck(column)) {
+                return false;
+            }
+
+        }
+        this.setOK(column);
+        return true;
+    },
+
+    setCheck:function(column, change) {
+        this.check[column.id] = change;
+    },
+
+    focus:function(http, column) {
+        if (this.isColFlexible(column)) {
+            url = this.formatRangeUrl(column);
+            url = "./range.json"
+            console.log("[url]" + url);
+            easyconf = this;
+            this.lock();
+            http.get(url).success(
+                function(response) {
+                    easyconf.range[column.id] = response.data;
+                    easyconf.unLock();
+                }
+            );
+        }
+    },
+
+    back:function() {
+        this.view = this.views.LIST; //LIST
+        this.freshCall();
+    },
+
+    commit:function(http) {
+        query = this.getDetailPKV();
+        if (this.isUpdateView()) {
+            url = this.formatUpdateUrl(query);
+        }
+        else if (this.isInsertView()) {
+            url = this.formatInsertUrl();
+        }
+        //url = "./OK.json"
+        url = "./NU.json"
+        console.log("[url]" + url);
+        easyconf = this;
+        this.lock();
+        //http.post(url).success(
+        http.get(url).success(
+            function(response) {
+                if (response.result == "00") {
+                    if (easyconf.isInsertView()) {
+                        easyconf.detailContent = {};
+                        easyconf.keyContent = {};
+                    }
+                }
+                else if (response.result == "01") {
+                    if (easyconf.isInsertView()) {
+                        easyconf.setPrimaryKeyContent();
+                        easyconf.setUniqueError();
+                    }
+                }
+                easyconf.unLock();
+            }
+        );
     },
 
     getSubTitle:function() {
@@ -148,7 +339,7 @@ var easyconf = new Object({
     },
 
     formatListHomeUrl:function(data, query) {
-        ret = "./" + this.apps.LIST + ".jsp?table=" + this.conf.table + "&data=" + JSON.stringify(data) + "&query=" + JSON.stringify(query)
+        ret = "./" + this.apps.LIST + ".jsp?table=" + this.table + "&data=" + JSON.stringify(data) + "&query=" + JSON.stringify(query)
         this.queryUrl = ret;
         ret += "&begin=0" + "&count=" + this.conf.count;
         return ret;
@@ -160,23 +351,23 @@ var easyconf = new Object({
     },
 
     formatDetailUrl:function(query) {
-        ret = "./" + this.apps.DETAIL + ".jsp?table=" + this.conf.table + "&query=" + JSON.stringify(query);
+        ret = "./" + this.apps.DETAIL + ".jsp?table=" + this.table + "&query=" + JSON.stringify(query);
         return ret;
     },
 
     formatDeleteUrl:function(query) {
-        ret = "./" + this.apps.DELETE + ".jsp?table=" + this.conf.table + "&query=" + JSON.stringify(query);
+        ret = "./" + this.apps.DELETE + ".jsp?table=" + this.table + "&query=" + JSON.stringify(query);
         return ret;
     },
 
 
     formatUpdateUrl:function(query) {
-        ret = "./" + this.apps.UPDATE + ".jsp?table=" + this.conf.table + "&data=" + JSON.stringify(this.detailContent) + "&query=" + JSON.stringify(query);
+        ret = "./" + this.apps.UPDATE + ".jsp?table=" + this.table + "&data=" + JSON.stringify(this.detailContent) + "&query=" + JSON.stringify(query);
         return ret;
     },
 
     formatInsertUrl:function(query) {
-        ret = "./" + this.apps.INSERT + ".jsp?table=" + this.conf.table + "&data=" + JSON.stringify(this.detailContent);
+        ret = "./" + this.apps.INSERT + ".jsp?table=" + this.table + "&data=" + JSON.stringify(this.detailContent);
         return ret;
     },
 
@@ -308,7 +499,7 @@ var easyconf = new Object({
     checkNull:function(column) {
         if (!column.isNull || column.isPrimaryKey) {
             this.err[column.id] = false;
-            this.errmsg[column.id] = this.msgs.NN;
+            this.errmsg[column.id] = this.msgs.NOTNULL;
             return false;
         }
         return true;
@@ -322,48 +513,36 @@ var easyconf = new Object({
             case 1://Integer
                 if (Math.floor(value) != value) {
                     this.err[column.id] = false;
-                    this.errmsg[column.id] = this.msgs.INT;
+                    this.errmsg[column.id] = this.msgs.INTEGER;
                     return false;
                 }
                 break;
             case 2://Double
                 if (isNaN(value)) {
                     this.err[column.id] = false;
-                    this.errmsg[column.id] = this.msgs.DB;
+                    this.errmsg[column.id] = this.msgs.DOUBLE;
                     return false;
                 }
                 break;
             case 3://Boolean
                 if (column.control != this.controls.RADIO) {
                     this.err[column.id] = false;
-                    this.errmsg[column.id] = this.msgs.TP;
+                    this.errmsg[column.id] = this.msgs.TYPEERROR;
                     return false;
                 }
                 break;
             case 4://Date
                 if (!this.isDate(value)) {
                     this.err[column.id] = false;
-                    this.errmsg[column.id] = this.msgs.DT;
+                    this.errmsg[column.id] = this.msgs.DATE;
                     return false;
                 }
                 break;
             default:
                 this.err[column.id] = false;
-                this.errmsg[column.id] = this.msgs.TP;
+                this.errmsg[column.id] = this.msgs.TYPEERROR;
                 return false;
                 break;
-        }
-        return true;
-    },
-
-    checkControl:function(column){
-        value = this.detailContent[column.id];
-        if (column.control == this.controls.CBOX) {
-            if (!this.cboxRE.test(value)) {
-                this.err[column.id] = false;
-                this.errmsg[column.id] = this.msgs.CB;
-                return false;
-            }
         }
         return true;
     },
@@ -403,7 +582,6 @@ var easyconf = new Object({
         for (var i=0; i<columns.length; i++) {
             column = columns[i];
             if (column.isPrimaryKey) {
-                console.log(this.detailContent[column.id], this.primaryKeyContent[column.id]);
                 if (this.primaryKeyContent[column.id] == null || this.detailContent[column.id] != this.primaryKeyContent[column.id]) {
                     return true;
                 }
@@ -425,7 +603,7 @@ var easyconf = new Object({
                 }
                 else {
                     this.err[column.id] = false;
-                    this.errmsg[column.id] = this.msgs.NU;
+                    this.errmsg[column.id] = this.msgs.NOTUNIQUE;
                 }
             }
         }
@@ -440,7 +618,6 @@ var easyconf = new Object({
     },
 
     checkUnique:function() {
-        console.log(this.primaryKeyContent);
         if (!this.isUnique()){
             this.setUniqueError();
             return false;

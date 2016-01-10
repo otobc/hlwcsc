@@ -34,24 +34,10 @@
                         function($scope, $http) {
                             $scope.query = {};
                             $scope.search = function() {
-                                console.log("search...");
-                                data = easyconf.getShowCol();
-                                url = easyconf.formatListHomeUrl(data, $scope.query);
-                                url = "./list.json";
-                                console.log("[url]" + url);
-                                easyconf.lock();
-                                $http.get(url).success(
-                                    function(response) {
-                                        easyconf.setListContent(response.data);
-                                        easyconf.unLock();
-                                    }
-                                );
+                                easyconf.search($http, $scope.query);
                             }
                             $scope.insert = function() {
-                                easyconf.detailContent = {};
-                                easyconf.keyContent = {};
-                                easyconf.view = 3; // INSERT
-                                easyconf.allCheck();
+                                easyconf.insert();
                             }
                         }
                     )
@@ -80,44 +66,16 @@
                             app.controller(
                                 "listContentRow",
                                 function($scope, $http) {
-                                    detail = function(view) {
-                                        query = easyconf.getPKV($scope.row);
-                                        url = easyconf.formatDetailUrl(query);
-                                        url = "./detail.json"
-                                        console.log("[url]" + url);
-                                        easyconf.lock();
-                                        $http.get(url).success(
-                                            function(response) {
-                                                easyconf.setDetailContent(response.data);
-                                                easyconf.view = view; 
-                                                if (view == 2) {
-                                                    easyconf.allCheck();
-                                                }
-                                                easyconf.unLock();
-                                            }
-                                        );
-                                    }
                                     $scope.detail = function() {
                                         console.log("detail...");
-                                        detail(1);
+                                        easyconf.detail($http, $scope.row, easyconf.views.DETAIL);
                                     }
                                     $scope.update = function() {
                                         console.log("update...");
-                                        detail(2);
+                                        easyconf.detail($http, $scope.row, easyconf.views.UPDATE);
                                     }
                                     $scope.delete = function() {
-                                        console.log("delete...");
-                                        query = easyconf.getPKV($scope.row);
-                                        url = easyconf.formatDeleteUrl(query);
-                                        url = "./OK.json"
-                                        console.log("[url]" + url);
-                                        easyconf.lock();
-                                        $http.get(url).success(
-                                            function(response) {
-                                                easyconf.fresh();
-                                                easyconf.unLock();
-                                            }
-                                        );
+                                        easyconf.dlt($http, $scope.row);
                                     }
                                 }
                             )
@@ -136,38 +94,19 @@
                     app.controller(
                         "listcontrol", 
                         function($scope, $http) {
-                            jump = function() {
-                                url = easyconf.formatListNewUrl()
-                                url = "./list.json";
-                                console.log("[url]" + url);
-                                easyconf.lock();
-                                $http.get(url).success(
-                                    function(response) {
-                                        easyconf.setListContent(response.data);
-                                        easyconf.unLock();
-                                    }
-                                );
-                            }
                             $scope.prev = function() {
-                                console.log("prev...");
-                                easyconf.setPrevCursor();
-                                jump();
+                                easyconf.prev($http);
                             }
                             $scope.next = function() {
-                                console.log("next...");
-                                easyconf.setNextCursor();
-                                jump();
+                                easyconf.next($http);
                             }
                             $scope.go = function() {
-                                console.log("go...");
-                                easyconf.setGoCursor($scope.page);
-                                jump();
+                                easyconf.go($http, $scope.page);
                             }
                             $scope.fresh = function() {
-                                console.log("fresh...");
-                                jump();
+                                easyconf.fresh($http);
                             }
-                            easyconf.fresh = $scope.fresh;
+                            easyconf.freshCall = $scope.fresh;
                         }
                     );
                 </script>
@@ -177,9 +116,9 @@
                     <tr ng-repeat="column in easyconf.conf.columns" ng-controller="detailContentRow">
                         <td ng-cloak>{{ column.name }}</td>
                         <td>
-                            <input type=text ng-if="easyconf.isColText(column)" ng-disabled="easyconf.disabled || easyconf.isDetailDisable(column)" ng-change="change()" ng-model="easyconf.detailContent[column.id]">
-                            <input type=radio ng-if="easyconf.isColRadio(column)" ng-disabled="easyconf.disabled || easyconf.isDetailDisable(column)" ng-change="change()" ng-model="easyconf.detailContent[column.id]">
-                            <select ng-if="easyconf.isColCbox(column)" ng-disabled="easyconf.disabled || easyconf.isDetailDisable(column)" ng-focus="focus()" ng-change="change()" ng-options="c.key as c.value for c in easyconf.range[column.id]" ng-model=easyconf.detailContent[column.id]>
+                            <input type=text ng-if="easyconf.isColText(column)" ng-disabled="easyconf.disabled || easyconf.isDetailDisable(column)" ng-change="change()" ng-model="easyconf.detailContent[column.id]" />
+                            <input type=radio ng-if="easyconf.isColRadio(column)" ng-disabled="easyconf.disabled || easyconf.isDetailDisable(column)" ng-change="change()" ng-model="easyconf.detailContent[column.id]" />
+                            <select ng-if="easyconf.isColCbox(column)" ng-disabled="easyconf.disabled || easyconf.isDetailDisable(column)" ng-focus="focus()" ng-change="change()" ng-options="c.key as c.value for c in easyconf.range[column.id]" ng-model=easyconf.detailContent[column.id]></select>
                         </td>
                         <td ng-cloak ng-show="easyconf.isMsgShow()">
                             {{ easyconf.errmsg[column.id] }}
@@ -190,48 +129,11 @@
                             "detailContentRow", 
                             function($scope, $http) {
                                 $scope.change = function() {
-                                    //should be the last check
-                                    if($scope.column.isPrimaryKey && !easyconf.checkUnique()) {
-                                        return false;
-                                    }
-                                    if (easyconf.isBlank($scope.column)) {
-                                        if (!easyconf.checkNull($scope.column)) {
-                                            return false;
-                                        }
-                                    }
-                                    else {
-                                        if(!easyconf.checkType($scope.column)) {
-                                            return false;
-                                        }
-
-                                        if(!easyconf.checkControl($scope.column)) {
-                                            return false;
-                                        }
-
-
-                                        if(!easyconf.selfCheck($scope.column)) {
-                                            return false;
-                                        }
-
-
-                                    }
-                                    easyconf.setOK($scope.column);
-                                    return true;
+                                    easyconf.change($scope.column);
                                 }
-                                easyconf.check[$scope.column.id] = $scope.change;
+                                easyconf.setCheck($scope.column, $scope.change);
                                 $scope.focus = function() {
-                                    if (easyconf.isColFlexible($scope.column)) {
-                                        url = easyconf.formatRangeUrl($scope.column);
-                                        url = "./range.json"
-                                        console.log("[url]" + url);
-                                        easyconf.lock();
-                                        $http.get(url).success(
-                                            function(response) {
-                                                easyconf.range[$scope.column.id] = response.data;
-                                                easyconf.unLock();
-                                            }
-                                        );
-                                    }
+                                    easyconf.focus($http, $scope.column);
                                 }
                             }
                         );
@@ -247,58 +149,21 @@
                     "detail", 
                     function($scope, $rootScope, $http) {
                         $scope.back = function() {
-                            easyconf.view = 0; //LIST
-                            easyconf.fresh();
+                            easyconf.back();
                         }
                         $scope.commit = function() {
-                            query = easyconf.getDetailPKV();
-                            if (easyconf.isUpdateView()) {
-                                url = easyconf.formatUpdateUrl(query);
-                            }
-                            else if (easyconf.isInsertView()) {
-                                url = easyconf.formatInsertUrl();
-                            }
-                            //url = "./OK.json"
-                            url = "./NU.json"
-                            console.log("[url]" + url);
-                            easyconf.lock();
-                            $http.get(url).success(
-                                function(response) {
-                                    if (response.result == "00") {
-                                        if (easyconf.isInsertView()) {
-                                            easyconf.detailContent = {};
-                                            easyconf.keyContent = {};
-                                        }
-                                    }
-                                    else if (response.result == "01") {
-                                        if (easyconf.isInsertView()) {
-                                            easyconf.setPrimaryKeyContent();
-                                            easyconf.setUniqueError();
-                                        }
-                                    }
-                                    easyconf.unLock();
-                                }
-                            );
+                            easyconf.commit($http);
                         }
                     }
                 );
             </script>
         </div>
         <script>
-            easyconf.init();
             app.controller(
                 "main", 
                 function($scope, $http) {
                     $scope.easyconf = easyconf;
-                    url = easyconf.formatInitUrl(table);
-                    url = "./init.json";
-                    $http.get(url).success(
-                        function(response) {
-                            easyconf.conf = response;
-                            easyconf.setCandidateAndRange();
-                            easyconf.isInit = true;
-                        }
-                    );
+                    easyconf.init($http, table);
                 }
             );
         </script>
