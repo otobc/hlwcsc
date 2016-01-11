@@ -1,5 +1,18 @@
 var easyconf = new Object({
     // basic definition here, pls do not modify them 
+    names:{
+        SEARCH:"SEARCH",
+        INSERT:"INSERT",
+        DETAIL:"DETAIL",
+        UPDATE:"UPDATE",
+        DELETE:"DELETE",
+        FRESH:"FRESH",
+        PREV:"PREV",
+        NEXT:"NEXT",
+        GO:"GO",
+        RETURN:"RETURN",
+        COMMIT:"COMMIT"
+    },
     subTitles:['LIST', 'DETAIL', 'UPDATE', 'INSERT'],
     msgs:{
         OK:"OK",

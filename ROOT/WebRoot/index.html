@@ -12,7 +12,7 @@
                 // table definition
                 var table = "test";
             </script>
-            <div ng-cloak id="listtitle">
+            <div ng-cloak id="title">
                 <h1>{{ easyconf.conf.title }} {{ easyconf.getSubTitle() }}</h1>
             </div>
             <div id="list" ng-show="easyconf.isListView()">
@@ -23,8 +23,8 @@
                             <td><input type=text ng-disabled="easyconf.disabled" ng-model="query[column.id]"></td>
                         </tr>
                         <tr>
-                            <td><button ng-disabled="easyconf.disabled" ng-click="search()">SEARCH</button></td>
-                            <td><button ng-disabled="easyconf.disabled" ng-click="insert()">INSERT</button></td>
+                            <td><button ng-cloak ng-disabled="easyconf.disabled" ng-click="search()">{{ easyconf.names.SEARCH }}</button></td>
+                            <td><button ng-cloak ng-disabled="easyconf.disabled" ng-click="insert()">{{ easyconf.names.INSERT }}</button></td>
                         </tr>
                     </table>
                 </div>
@@ -57,9 +57,9 @@
                                 {{ easyconf.formatListContent(row, column) }}
                             </td>
                             <td>
-                                <button ng-disabled="easyconf.disabled" ng-click="detail()">DETAIL</button>
-                                <button ng-disabled="easyconf.disabled" ng-click="update()">UPDATE</button>
-                                <button ng-disabled="easyconf.disabled" ng-click="delete()">DELETE</button>
+                                <button ng-cloak ng-disabled="easyconf.disabled" ng-click="detail()">{{ easyconf.names.DETAIL }}</button>
+                                <button ng-cloak ng-disabled="easyconf.disabled" ng-click="update()">{{ easyconf.names.UPDATE }}</button>
+                                <button ng-cloak ng-disabled="easyconf.disabled" ng-click="delete()">{{ easyconf.names.DELETE }}</button>
                             </td>
                         </tr>
                         <script>
@@ -84,11 +84,11 @@
                 </div>
                 <div id="listcontrol" ng-show="easyconf.isSearched()" ng-controller="listcontrol">
                     <span ng-cloak>{{ easyconf.getCurPage() }}</span>
-                    <button ng-disabled="easyconf.disabled" ng-click="fresh()">FRESH</button>
-                    <button ng-disabled="easyconf.disabled" ng-click="prev()">PREV</button>
-                    <button ng-disabled="easyconf.disabled" ng-click="next()">NEXT</button>
+                    <button ng-cloak ng-disabled="easyconf.disabled" ng-click="fresh()">{{ easyconf.names.FRESH }}</button>
+                    <button ng-cloak ng-disabled="easyconf.disabled" ng-click="prev()">{{ easyconf.names.PREV }}</button>
+                    <button ng-cloak ng-disabled="easyconf.disabled" ng-click="next()">{{ easyconf.names.NEXT }}</button>
                     <input type=text ng-disabled="easyconf.disabled" ng-model="page">
-                    <button ng-disabled="easyconf.disabled || !easyconf.isPstInt(page)" ng-click="go()">GO</button>
+                    <button ng-cloak ng-disabled="easyconf.disabled || !easyconf.isPstInt(page)" ng-click="go()">{{ easyconf.names.GO }}</button>
                 </div>
                 <script>
                     app.controller(
@@ -111,52 +111,54 @@
                     );
                 </script>
             </div>
-            <div id="detail" ng-show="!easyconf.isListView()" ng-controller="detail">
-                <table>
-                    <tr ng-repeat="column in easyconf.conf.columns" ng-controller="detailContentRow">
-                        <td ng-cloak>{{ column.name }}</td>
-                        <td>
-                            <input type=text ng-if="easyconf.isColText(column)" ng-disabled="easyconf.disabled || easyconf.isDetailDisable(column)" ng-change="change()" ng-model="easyconf.detailContent[column.id]" />
-                            <input type=radio ng-if="easyconf.isColRadio(column)" ng-disabled="easyconf.disabled || easyconf.isDetailDisable(column)" ng-change="change()" ng-model="easyconf.detailContent[column.id]" />
-                            <select ng-if="easyconf.isColCbox(column)" ng-disabled="easyconf.disabled || easyconf.isDetailDisable(column)" ng-focus="focus()" ng-change="change()" ng-options="c.key as c.value for c in easyconf.range[column.id]" ng-model=easyconf.detailContent[column.id]></select>
-                        </td>
-                        <td ng-cloak ng-show="easyconf.isMsgShow()">
-                            {{ easyconf.errmsg[column.id] }}
-                        </td>
-                    </tr>
-                    <script>
-                        app.controller(
-                            "detailContentRow", 
-                            function($scope, $http) {
-                                $scope.change = function() {
-                                    easyconf.change($scope.column);
+            <div id="detail" ng-show="!easyconf.isListView()">
+                <div id="detailContent">
+                    <table>
+                        <tr ng-repeat="column in easyconf.conf.columns" ng-controller="detailContentRow">
+                            <td ng-cloak>{{ column.name }}</td>
+                            <td>
+                                <input type=text ng-if="easyconf.isColText(column)" ng-disabled="easyconf.disabled || easyconf.isDetailDisable(column)" ng-change="change()" ng-model="easyconf.detailContent[column.id]" />
+                                <input type=radio ng-if="easyconf.isColRadio(column)" ng-disabled="easyconf.disabled || easyconf.isDetailDisable(column)" ng-change="change()" ng-model="easyconf.detailContent[column.id]" />
+                                <select ng-if="easyconf.isColCbox(column)" ng-disabled="easyconf.disabled || easyconf.isDetailDisable(column)" ng-focus="focus()" ng-change="change()" ng-options="c.key as c.value for c in easyconf.range[column.id]" ng-model=easyconf.detailContent[column.id]></select>
+                            </td>
+                            <td ng-cloak ng-show="easyconf.isMsgShow()">
+                                {{ easyconf.errmsg[column.id] }}
+                            </td>
+                        </tr>
+                        <script>
+                            app.controller(
+                                "detailContentRow", 
+                                function($scope, $http) {
+                                    $scope.change = function() {
+                                        easyconf.change($scope.column);
+                                    }
+                                    easyconf.setCheck($scope.column, $scope.change);
+                                    $scope.focus = function() {
+                                        easyconf.focus($http, $scope.column);
+                                    }
                                 }
-                                easyconf.setCheck($scope.column, $scope.change);
-                                $scope.focus = function() {
-                                    easyconf.focus($http, $scope.column);
-                                }
+                            );
+                        </script>
+                    </table>
+                </div>
+                <div id="detailControl" ng-controller="detailControl">
+                    <button ng-cloak ng-disabled="easyconf.disabled" ng-click="back()">{{ easyconf.names.RETURN }}</button>
+                    <button ng-cloak ng-show="easyconf.isCommitShow()" ng-disabled="easyconf.disabled || !easyconf.allOK()" ng-click="commit()">{{ easyconf.names.COMMIT }}</button>
+                </div>
+                <script>
+                    app.controller(
+                        "detailControl", 
+                        function($scope, $rootScope, $http) {
+                            $scope.back = function() {
+                                easyconf.back();
                             }
-                        );
-                    </script>
-                    <tr>
-                        <td><button ng-disabled="easyconf.disabled" ng-click="back()">RETURN</button></td>
-                        <td><button ng-show="easyconf.isCommitShow()" ng-disabled="easyconf.disabled || !easyconf.allOK()" ng-click="commit()">COMMIT</button></td>
-                    </tr>
-                </table>
+                            $scope.commit = function() {
+                                easyconf.commit($http);
+                            }
+                        }
+                    );
+                </script>
             </div>
-            <script>
-                app.controller(
-                    "detail", 
-                    function($scope, $rootScope, $http) {
-                        $scope.back = function() {
-                            easyconf.back();
-                        }
-                        $scope.commit = function() {
-                            easyconf.commit($http);
-                        }
-                    }
-                );
-            </script>
         </div>
         <script>
             app.controller(

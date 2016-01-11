@@ -12,7 +12,6 @@
             "isPrimaryKey":true,
             "isNull":false,
             "type":1,
-            "length":10,
             "control":0,
             "check":
             [
@@ -48,7 +47,6 @@
             "isPrimaryKey":true,
             "isNull":true,
             "type":0,
-            "length":10,
             "control":2,
             "check":
             [
@@ -76,7 +74,6 @@
             "isPrimaryKey":false,
             "isNull":true,
             "type":2,
-            "length":10,
             "control":0,
             "check":
             [
