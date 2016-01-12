@@ -28,20 +28,7 @@
                 }
             ],		
             "isSelect":true,
-            "range":
-            {
-                "type":null,
-                "static":
-                [
-                ],
-                "dynamic":
-                {
-                    "key":null,
-                    "value":null,	 
-                    "table":null,
-                    "where":[]
-                }
-            },
+            "range":[],
             "default":"col1"
         },
         {
@@ -59,21 +46,10 @@
             ],
             "isSelect":true,
             "range":
-            {
-                "type":0,
-                "static":
-                [
-                    {"key1":"value1"}, 
-                    {"key2":"value2"}
-                ],
-                "dynamic":
-                {
-                    "key":"col1",
-                    "value":"col2",	 
-                    "table":"table",
-                    "where":["col1", "col2"]
-                }
-            },
+            [
+                {"key":"1", "value":"a"}, 
+                {"key":"2", "value":"b"} 
+            ],
             "default":"col2"
         },
         {
@@ -90,20 +66,7 @@
             [
             ],
             "isSelect":false,
-            "range":
-            {
-                "type":null,
-                "static":
-                [
-                ],
-                "dynamic":
-                {
-                    "key":null,
-                    "value":null,	 
-                    "table":null,
-                    "where":[]
-                }
-            },
+            "range":[],
             "default":3.0
         }
     ]
