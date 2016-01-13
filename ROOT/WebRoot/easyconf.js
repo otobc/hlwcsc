@@ -158,9 +158,9 @@ var easyconf = new Object({
 
     jump:function(http) {
         ec.lock();
-        http.get(ec.apps.LIST, {params:{table:ec.table, data:ec.list2str(data), query:ec.dict2str(ec.lastquery)}}).success(
-//        url = "./list.json";
-//        http.get(url).success(
+//        http.get(ec.apps.LIST, {params:{table:ec.table, data:ec.list2str(data), query:ec.dict2str(ec.lastquery)}}).success(
+        url = "./list.json";
+        http.get(url).success(
             function(response) {
                 ec.setListContent(response.data);
                 ec.unLock();

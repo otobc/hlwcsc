@@ -34,24 +34,28 @@ var evaluate = new Object({
         tooltip: {},
         legend: [{data:[]}],
         animationDuration: 1500,
-        animationEasingUpdate: 'quinticInOut',
+        animationEasingUpdate: "quinticInOut",
         series : [
             {
-                type: 'graph',
-                layout: 'none',
+                type: "graph",
+                layout: "force",
+                lineStyle:{
+                    normal:{
+                        type:"dashed",
+                    }
+                },
                 data: [],
                 links: [],
                 categories: [],
                 roam: true,
                 label: {
                     normal: {
-                        position: 'right'
+                        position: "right"
                     }
                 },
-                lineStyle: {
-                    normal: {
-                        curveness: 0.3
-                    }
+                force: {
+                    initLayout: "circular",
+                    repulsion: 100
                 }
             }
         ]
@@ -83,7 +87,7 @@ var evaluate = new Object({
 
         for (var i=0; i<response.vertex.length; i++) {
             vertex = response.vertex[i];
-            data.push({id:vertex.id, itemStyle:null, label:{normal:{show:true}}, name:vertex.name, value:vertex.sScore, category:evaluate.categoryIndex[vertex.type], symbolSize:vertex.dScore * 100, x:0.5, y:0});
+            data.push({id:vertex.id, itemStyle:null, label:{normal:{show:true}}, name:vertex.name + "[" + vertex.sScore + "]", value:vertex.dScore, category:evaluate.categoryIndex[vertex.type], symbolSize:vertex.dScore * 20});
         }
 
         for (var i=0; i<response.edge.length; i++) {
@@ -93,6 +97,7 @@ var evaluate = new Object({
 
         ev.option.series[0].data = data;
         ev.option.series[0].links = links;
+        ev.option.series[0].name = response.experimentInfo.name;
     },
 
     commit:function(http) {
@@ -100,12 +105,12 @@ var evaluate = new Object({
         
         ev.lock();
         ev.chart.showLoading();
-//        http.get(ev.apps.EVALUATE, {params:{id:ev.id, isReadCache:ev.isReadCache ? 1 : 0}}).success(
+//        http.get(ev.apps.EVALUATE, {params:{id:ev.id, isReadCache:ev.isReadCache}}).success(
         url = "./evaluate.json";
         http.get(url).success(
             function(response) {
                 ev.chart.hideLoading();
-                ev.experimentinfo = response.experimentinfo;
+                ev.experimentInfo = response.experimentInfo;
                 ev.setOption(response);
                 console.log(ev.option);
                 ev.chart.setOption(ev.option);

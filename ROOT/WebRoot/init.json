@@ -48,7 +48,7 @@
             "isPrimaryKey":false,
             "isNull":true,
             "type":0,
-            "control":2,
+            "control":1,
             "check":
             [
             ],

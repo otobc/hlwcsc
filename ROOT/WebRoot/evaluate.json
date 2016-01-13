@@ -1,7 +1,7 @@
 {
     "result":"00",
     "message":"OK",
-    "experimentinfo":
+    "experimentInfo":
     {
         "id":"id",
         "name":"name",
@@ -17,21 +17,56 @@
             "name":"name0",
             "type":"0",
             "sScore":"0.8",
-            "dScore":0.8
+            "dScore":0.8,
+            "depth":2
         },
         {
             "id":"node1",
             "name":"name1",
             "type":"1",
             "sScore":"1/5",
-            "dScore":0.2
+            "dScore":0.2,
+            "depth":2
         },
         {
             "id":"node2",
             "name":"name2",
             "type":"0",
             "sScore":"0.5",
-            "dScore":0.5
+            "dScore":0.5,
+            "depth":1
+        },
+        {
+            "id":"node3",
+            "name":"name3",
+            "type":"0",
+            "sScore":"0.9",
+            "dScore":0.9,
+            "depth":2
+        },
+        {
+            "id":"node4",
+            "name":"name4",
+            "type":"0",
+            "sScore":"0.4",
+            "dScore":0.4,
+            "depth":2
+        },
+        {
+            "id":"node5",
+            "name":"name5",
+            "type":"1",
+            "sScore":"0.1",
+            "dScore":0.1,
+            "depth":1
+        },
+        {
+            "id":"node6",
+            "name":"name6",
+            "type":"0",
+            "sScore":"0.7",
+            "dScore":0.7,
+            "depth":0
         }
     ],
     "edge":
@@ -45,6 +80,26 @@
             "child":"node1",
             "parent":"node2",
             "weight":0.7
+        },
+        {
+            "child":"node3",
+            "parent":"node5",
+            "weight":0.2
+        },
+        {
+            "child":"node4",
+            "parent":"node5",
+            "weight":0.8
+        },
+        {
+            "child":"node2",
+            "parent":"node6",
+            "weight":0.5
+        },
+        {
+            "child":"node5",
+            "parent":"node6",
+            "weight":0.4
         }
 	]
 }
