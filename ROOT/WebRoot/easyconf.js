@@ -1,5 +1,14 @@
 var easyconf = new Object({
     // basic definition here, pls do not modify them 
+    selectHints: {
+        0:"EQUALS",
+        1:"CONTAINS",
+        2:"LESS THAN",
+        3:"MORE THAN",
+        4:"LESS THAN OR EQUALS",
+        5:"MORE THAN OR EQUALS"
+    },
+
     names:{
         SEARCH:"SEARCH",
         INSERT:"INSERT",
@@ -12,6 +21,13 @@ var easyconf = new Object({
         GO:"GO",
         RETURN:"RETURN",
         COMMIT:"COMMIT"
+    },
+    types:{
+        STRING:0,
+        INTEGER:1,
+        DOUBLE:2,
+        BOOLEAN:3,
+        DATE:4
     },
     subTitles:['LIST', 'DETAIL', 'UPDATE', 'INSERT'],
     msgs:{
@@ -49,226 +65,225 @@ var easyconf = new Object({
         RANGE:"range"
     },
     dateRE:RegExp("^\\d{4}-(0?[1-9]|1[0-2])-(0?[1-9]|[1-2]\\d|3[0-1]) ([0-1]\\d|2[0-3]):[0-5]\\d:[0-5]\\d\\.\\d{2}$"),
-    sep:"|",
+    _keyStr : "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=",
+    rangeSep:"|",
+    colSep:",",
+    kvSep:":",
 
     // basic function here, pls do not modify them
     init:function(http, table) {
-        this.table = table;
+        ec = this;
 
-        this.listContent = [];
-        this.detailContent = {};
-        this.primaryKeyContent = {};
-        this.candidate = {};
-        this.range = {};
-        this.err = {};
-        this.errmsg = {};
-        this.check = {};
-        this.view = null;
-        this.cursor = 0;
-        this.queryUrl = null;
-        this.view = this.views.LIST;
+        ec.table = table;
 
-        url = this.formatInitUrl(table);
+        ec.listContent = [];
+        ec.detailContent = {};
+        ec.primaryKeyContent = {};
+        ec.candidate = {};
+        ec.range = {};
+        ec.err = {};
+        ec.errmsg = {};
+        ec.check = {};
+        ec.view = null;
+        ec.cursor = 0;
+        ec.lastquery = null;
+        ec.view = ec.views.LIST;
+
+//        http.get(ec.apps.INIT, {params:{table:ec.table}}).success(
         url = "./init.json";
-        easyconf = this;
         http.get(url).success(
             function(response) {
-                easyconf.conf = response;
-                easyconf.setCandidateAndRange();
-                easyconf.isInit = true;
+                ec.conf = response;
+                ec.setCandidateAndRange();
+                ec.isInit = true;
             }
         );
     },
 
     search:function(http, query) {
         console.log("search...");
-        data = this.getShowCol();
-        url = this.formatListHomeUrl(data, query);
+        data = ec.getShowCol();
+        
+        ec.lock();
+//        http.get(ec.apps.LIST, {params:{table:ec.table, data:ec.list2str(data), query:ec.dict2str(query)}}).success(
         url = "./list.json";
-        console.log("[url]" + url);
-        easyconf = this;
-        this.lock();
         http.get(url).success(
             function(response) {
-                easyconf.setListContent(response.data);
-                easyconf.unLock();
+                ec.setListContent(response.data);
+                ec.lastquery = query;
+                ec.unLock();
             }
         );
     },
 
     insert:function() {
-        this.detailContent = {};
-        this.keyContent = {};
-        this.view = 3; // INSERT
-        this.allCheck();
+        ec.setDefaultValue();
+        ec.keyContent = {};
+        ec.view = 3; // INSERT
+        ec.allCheck();
     },
 
     detail:function(http, row, view) {
-        query = this.getPKV(row);
-        url = this.formatDetailUrl(query);
+        query = ec.getPKV(row);
+        
+        ec.lock();
+//        http.get(ec.apps.DETAIL, {params:{table:ec.table, query:ec.dict2str(query)}}).success(
         url = "./detail.json"
-        console.log("[url]" + url);
-        easyconf = this;
-        this.lock();
         http.get(url).success(
             function(response) {
-                easyconf.setDetailContent(response.data);
-                easyconf.view = view; 
-                if (view == easyconf.views.UPDATE) {
-                    easyconf.allCheck();
+                ec.setDetailContent(response.data);
+                ec.view = view; 
+                if (view == ec.views.UPDATE) {
+                    ec.allCheck();
                 }
-                easyconf.unLock();
+                ec.unLock();
             }
         );
     },
 
     dlt:function(http, row) {
         console.log("delete...");
-        query = this.getPKV(row);
-        url = this.formatDeleteUrl(query);
-        url = "./OK.json"
-        console.log("[url]" + url);
-        easyconf = this;
-        this.lock();
-        //http.post(url).success(
+        query = ec.getPKV(row);
+        
+        ec.lock();
+//        http.post(ec.apps.DELETE, {params:{table:ec.table, query:ec.dict2str(query)}}).success(
+        url = "./OK.json";
         http.get(url).success(
             function(response) {
-                easyconf.freshCall();
-                easyconf.unLock();
+                ec.freshCall();
+                ec.unLock();
             }
         );
     },
 
     jump:function(http) {
-        url = this.formatListNewUrl()
-        url = "./list.json";
-        console.log("[url]" + url);
-        easyconf = this;
-        this.lock();
-        http.get(url).success(
+        ec.lock();
+        http.get(ec.apps.LIST, {params:{table:ec.table, data:ec.list2str(data), query:ec.dict2str(ec.lastquery)}}).success(
+//        url = "./list.json";
+//        http.get(url).success(
             function(response) {
-                easyconf.setListContent(response.data);
-                easyconf.unLock();
+                ec.setListContent(response.data);
+                ec.unLock();
             }
         );
     },
 
     prev:function(http) {
         console.log("prev...");
-        this.setPrevCursor();
-        this.jump(http);
+        ec.setPrevCursor();
+        ec.jump(http);
     },
 
     next:function(http) {
         console.log("next...");
-        this.setNextCursor();
-        this.jump(http);
+        ec.setNextCursor();
+        ec.jump(http);
     },
 
     go:function(http, page) {
         console.log("go...");
-        this.setGoCursor(page);
-        this.jump(http);
+        ec.setGoCursor(page);
+        ec.jump(http);
     },
 
     fresh:function(http) {
         console.log("fresh...");
-        if (this.isSearched()) {
-            this.jump(http);
+        if (ec.isSearched()) {
+            ec.jump(http);
         }
     },
 
     change:function(column) {
         //should be the first check
-        if(column.isPrimaryKey && !this.checkUnique()) {
+        if(column.isPrimaryKey && !ec.checkUnique()) {
             return false;
         }
-        if (this.isBlank(column)) {
-            if (!this.checkNull(column)) {
+        if (ec.isBlank(column)) {
+            if (!ec.checkNull(column)) {
                 return false;
             }
         }
         else {
-            if(!this.checkType(column)) {
+            if(!ec.checkType(column)) {
                 return false;
             }
 
-            if(!this.selfCheck(column)) {
+            if(!ec.selfCheck(column)) {
                 return false;
             }
 
         }
-        this.setOK(column);
+        ec.setOK(column);
         return true;
     },
 
     setCheck:function(column, change) {
-        this.check[column.id] = change;
+        ec.check[column.id] = change;
     },
 
     focus:function(http, column) {
-        if (this.isColFlexible(column)) {
-            url = this.formatRangeUrl(column);
+        if (ec.isColFlexible(column)) {
+            ec.lock();
+//            http.get(ec.apps.RANGE, {params:{table:column.flexible.table, key:column.flexible.key, value:column.flexible.value, query:ec.dict2str(ec.getRGV(column))}}).success(
             url = "./range.json"
-            console.log("[url]" + url);
-            easyconf = this;
-            this.lock();
             http.get(url).success(
                 function(response) {
-                    easyconf.range[column.id] = response.data;
-                    easyconf.unLock();
+                    ec.range[column.id] = response.data;
+                    ec.unLock();
                 }
             );
         }
     },
 
     back:function() {
-        this.view = this.views.LIST; //LIST
-        this.freshCall();
+        ec.view = ec.views.LIST; //LIST
+        ec.freshCall();
     },
 
     commit:function(http) {
-        query = this.getDetailPKV();
-        if (this.isUpdateView()) {
-            url = this.formatUpdateUrl(query);
+        query = ec.getDetailPKV();
+
+        if (ec.isUpdateView()) {
+            domain = ec.apps.UPDATE;
+            config = {params:{table:ec.table, data:ec.dict2str(ec.detailContent), query:ec.dict2str(query)}};
         }
-        else if (this.isInsertView()) {
-            url = this.formatInsertUrl();
+        else if (ec.isInsertView()) {
+            domain = ec.apps.INSERT;
+            config = {params:{table:ec.table, data:ec.dict2str(ec.detailContent)}};
         }
-        //url = "./OK.json"
+        
+        ec.lock();
+//        http.post(domain, config).success(
+//        url = "./OK.json"
         url = "./NU.json"
-        console.log("[url]" + url);
-        easyconf = this;
-        this.lock();
-        //http.post(url).success(
         http.get(url).success(
             function(response) {
                 if (response.result == "00") {
-                    if (easyconf.isInsertView()) {
-                        easyconf.detailContent = {};
-                        easyconf.keyContent = {};
+                    if (ec.isInsertView()) {
+                        ec.setDetailContent();
+                        ec.keyContent = {};
                     }
                 }
                 else if (response.result == "01") {
-                    if (easyconf.isInsertView()) {
-                        easyconf.setPrimaryKeyContent();
-                        easyconf.setUniqueError();
+                    if (ec.isInsertView()) {
+                        ec.setPrimaryKeyContent();
+                        ec.setUniqueError();
                     }
                 }
-                easyconf.unLock();
+                ec.unLock();
             }
         );
     },
 
     getSubTitle:function() {
-        return this.subTitles[this.view];
+        return ec.subTitles[ec.view];
     },
 
     setCandidateAndRange:function() {
-        columns = this.conf.columns;
+        columns = ec.conf.columns;
         for (var i=0; i<columns.length; i++) {
             column = columns[i];
-            if (column.control == this.controls.CBOX && column.candidate == this.candidates.FIXED) {
+            if (column.control == ec.controls.CBOX && column.candidate == ec.candidates.FIXED) {
                 kv = {};
                 range = [];
                 fixed = column.fixed;
@@ -278,27 +293,27 @@ var easyconf = new Object({
                     kv[key] = value;
                     range.push({"key":key, "value":value});
                 }
-                this.candidate[column.id] = kv;
-                this.range[column.id] = range;
+                ec.candidate[column.id] = kv;
+                ec.range[column.id] = range;
             }
         }
     },
 
     isListView:function() {
-        return (this.view == this.views.LIST);
+        return (ec.view == ec.views.LIST);
     },
 
     isUpdateView:function() {
-        return (this.view == this.views.UPDATE);
+        return (ec.view == ec.views.UPDATE);
     },
 
     isInsertView:function() {
-        return (this.view == this.views.INSERT);
+        return (ec.view == ec.views.INSERT);
     },
 
     getCol:function(isOnlyShow) {
         var ret = [];
-        columns = this.conf.columns;
+        columns = ec.conf.columns;
         for (var i=0; i<columns.length; i++) {
             column = columns[i];
             if (!isOnlyShow || column.isShow) {
@@ -309,16 +324,16 @@ var easyconf = new Object({
     },
 
     getShowCol:function() {
-        return this.getCol(true);
+        return ec.getCol(true);
     },
 
     getAllCol:function() {
-        return this.getCol(false);
+        return ec.getCol(false);
     },
 
     getPKV:function(row) {
         var ret = {};
-        columns = this.conf.columns;
+        columns = ec.conf.columns;
         for (var i=0; i<columns.length; i++) {
             column = columns[i];
             if (column.isPrimaryKey) {
@@ -329,94 +344,79 @@ var easyconf = new Object({
     },
 
     getDetailPKV:function() {
-        return this.getPKV(this.detailContent);
+        return ec.getPKV(ec.detailContent);
     },
 
     getRGV:function(column) {
         var ret = {};
         where = column.flexible.where;
         for (var i=0; i<where.length; i++) {
-            ret[where[i]] = this.detailContent[where[i]];      
+            ret[where[i]] = ec.detailContent[where[i]];      
         }
         return ret;
     },
 
-    formatRangeUrl:function(column) {
-        ret = "./" + this.apps.RANGE + ".jsp?table=" + column.flexible.table + "&key=" + column.flexible.key + "&value=" + column.flexible.value + "&query=" + JSON.stringify(this.getRGV(column));
+    list2str:function(list) {
+        var ret = "";
+        for (var i=0; i<list.length; i++) {
+            if (i == 0) {
+                ret += ec.encode(String(list[i]));
+            }
+            else {
+                ret += ec.colSep + ec.encode(String(list[i]));
+            }
+        }
         return ret;
     },
 
-    formatInitUrl:function(table) {
-        ret = "./" + this.apps.INIT + ".jsp?table=" + table;
-        return ret;
-    },
-
-    formatListHomeUrl:function(data, query) {
-        ret = "./" + this.apps.LIST + ".jsp?table=" + this.table + "&data=" + JSON.stringify(data) + "&query=" + JSON.stringify(query)
-        this.queryUrl = ret;
-        ret += "&begin=0" + "&count=" + this.conf.count;
-        return ret;
-    },
-
-    formatListNewUrl:function() {
-        ret = this.queryUrl + "&begin=" + this.cursor + "&count=" + this.conf.count;
-        return ret
-    },
-
-    formatDetailUrl:function(query) {
-        ret = "./" + this.apps.DETAIL + ".jsp?table=" + this.table + "&query=" + JSON.stringify(query);
-        return ret;
-    },
-
-    formatDeleteUrl:function(query) {
-        ret = "./" + this.apps.DELETE + ".jsp?table=" + this.table + "&query=" + JSON.stringify(query);
-        return ret;
-    },
-
-
-    formatUpdateUrl:function(query) {
-        ret = "./" + this.apps.UPDATE + ".jsp?table=" + this.table + "&data=" + JSON.stringify(this.detailContent) + "&query=" + JSON.stringify(query);
-        return ret;
-    },
-
-    formatInsertUrl:function(query) {
-        ret = "./" + this.apps.INSERT + ".jsp?table=" + this.table + "&data=" + JSON.stringify(this.detailContent);
+    dict2str:function(dict) {
+        var ret = "";
+        var count = 0;
+        for (key in dict) {
+            if (count == 0) {
+                ret += ec.encode(String(key)) + ec.kvSep + ec.encode(String(dict[key]));
+            }
+            else {
+                ret += ec.colSep + ec.encode(String(key)) + ec.kvSep + ec.encode(String(dict[key]));
+            }
+            count += 1;   
+        }
         return ret;
     },
 
     lock:function() {
-        this.disabled = true;
+        ec.disabled = true;
     },
 
     unLock:function() {
-        this.disabled = false;
+        ec.disabled = false;
     },
 
     formatListContent:function(row, column) {
         value = row[column.id];
-        ret = (column.control < this.controls.CBOX) ? value : (row[column.id] + "-" + this.candidate[column.id][value]);
+        ret = (column.control < ec.controls.CBOX) ? value : (row[column.id] + "-" + ec.candidate[column.id][value]);
         return ret;
     },
 
     getContent:function(data, isList) {
         var ret = {};
-        columns = this.conf.columns;
+        columns = ec.conf.columns;
         for (var i=0; i<columns.length; i++) {
             column = columns[i];
             content = data[i];
-            if (column.control == this.controls.CBOX && column.candidate == this.candidates.FLEXIBLE) {
-                idx = content.search(this.sep);
-                keyContent = content.substr(0, idx+1);
-                valueContent = content.substr(idx+2);
+            if (column.control == ec.controls.CBOX && column.candidate == ec.candidates.FLEXIBLE) {
+                idx = content.indexOf("|");
+                keyContent = ec.decode(content.substr(0, idx));
+                valueContent = ec.decode(content.substr(idx+1));
                 ret[column.id] =  keyContent;
                 if (isList) {
-                    if (this.candidate[column.id] == null) {
-                        this.candidate[column.id] = {};
+                    if (ec.candidate[column.id] == null) {
+                        ec.candidate[column.id] = {};
                     }
-                    this.candidate[column.id][keyContent] = valueContent;
+                    ec.candidate[column.id][keyContent] = valueContent;
                 }
                 else {
-                    this.range[column.id] = [{"key":keyContent, "value":valueContent}];
+                    ec.range[column.id] = [{"key":keyContent, "value":valueContent}];
                 }
             }
             else {
@@ -427,32 +427,32 @@ var easyconf = new Object({
     },
 
     setListContent:function(data) {
-        this.listContent = [];
+        ec.listContent = [];
         for (var i=0; i<data.length; i++) {
-            this.listContent.push(this.getContent(data[i], true));
+            ec.listContent.push(ec.getContent(data[i], true));
         }
     },
 
     setDetailContent:function(data) {
-        this.detailContent = this.getContent(data, false);
+        ec.detailContent = ec.getContent(data, false);
     },
 
     setPrimaryKeyContent:function() {
-        columns = this.conf.columns;
+        columns = ec.conf.columns;
         for (var i=0; i<columns.length; i++) {
             column = columns[i];
             if (column.isPrimaryKey) {
-                this.primaryKeyContent[column.id] = this.detailContent[column.id];
+                ec.primaryKeyContent[column.id] = ec.detailContent[column.id];
             }
         }
     },
 
     isSearched:function() {
-        return (this.queryUrl != null);
+        return (ec.lastquery != null);
     },
 
     getCurPage:function() {
-        return this.conf == null ? -1 : ((this.cursor / this.conf.count) + 1);
+        return ec.conf == null ? -1 : ((ec.cursor / ec.conf.count) + 1);
     },
 
     isInt:function(num) {
@@ -460,100 +460,100 @@ var easyconf = new Object({
     },
 
     isPstInt:function(num) {
-        return (this.isInt(num) && num > 0);
+        return (ec.isInt(num) && num > 0);
     },
 
     setPrevCursor:function() {
-        if ((this.cursor - this.conf.count) < 0) {
-            this.cursor = 0;
+        if ((ec.cursor - ec.conf.count) < 0) {
+            ec.cursor = 0;
         }
         else {
-            this.cursor -= this.conf.count;
+            ec.cursor -= ec.conf.count;
         }
     },
 
     setNextCursor:function() {
-        this.cursor += this.conf.count;
+        ec.cursor += ec.conf.count;
     },
 
     setGoCursor:function(page) {
-        this.cursor = (page-1) * this.conf.count;
+        ec.cursor = (page-1) * ec.conf.count;
     },
 
     isColText:function(column) {
-        return (column.control == this.controls.TEXT);
+        return (column.control == ec.controls.TEXT);
     },
 
     isColRadio:function(column) {
-        return (column.control == this.controls.RADIO);
+        return (column.control == ec.controls.RADIO);
     },
     
     isColCbox:function(column) {
-        return (column.control == this.controls.CBOX);
+        return (column.control == ec.controls.CBOX);
     },
 
     isDetailDisable:function(column) {
-        return (this.view < this.views.UPDATE || (this.view == this.views.UPDATE && column.isPrimaryKey));
+        return (ec.view < ec.views.UPDATE || (ec.view == ec.views.UPDATE && column.isPrimaryKey));
     },
 
     isMsgShow:function() {
-        return (this.view > this.views.DETAIL);
+        return (ec.view > ec.views.DETAIL);
     },
 
     isCommitShow:function() {
-        return (this.view > this.views.DETAIL);
+        return (ec.view > ec.views.DETAIL);
     },
 
     isBlank:function(column) {
-        value = this.detailContent[column.id];
+        value = ec.detailContent[column.id];
         return (value == null || String(value).length == 0); 
     },
 
     checkNull:function(column) {
         if (!column.isNull || column.isPrimaryKey) {
-            this.err[column.id] = false;
-            this.errmsg[column.id] = this.msgs.NOTNULL;
+            ec.err[column.id] = false;
+            ec.errmsg[column.id] = ec.msgs.NOTNULL;
             return false;
         }
         return true;
     },
 
     checkType:function(column) {
-        value = this.detailContent[column.id];
+        value = ec.detailContent[column.id];
         switch (column.type) {
-            case 0://String
+            case ec.types.STRING://String
                 break;
-            case 1://Integer
+            case ec.types.INTEGER://Integer
                 if (Math.floor(value) != value) {
-                    this.err[column.id] = false;
-                    this.errmsg[column.id] = this.msgs.INTEGER;
+                    ec.err[column.id] = false;
+                    ec.errmsg[column.id] = ec.msgs.INTEGER;
                     return false;
                 }
                 break;
-            case 2://Double
+            case ec.types.DOUBLE://Double
                 if (isNaN(value)) {
-                    this.err[column.id] = false;
-                    this.errmsg[column.id] = this.msgs.DOUBLE;
+                    ec.err[column.id] = false;
+                    ec.errmsg[column.id] = ec.msgs.DOUBLE;
                     return false;
                 }
                 break;
-            case 3://Boolean
-                if (column.control != this.controls.RADIO) {
-                    this.err[column.id] = false;
-                    this.errmsg[column.id] = this.msgs.TYPEERROR;
+            case ec.types.BOOLEAN://Boolean
+                if (column.control != ec.controls.RADIO) {
+                    ec.err[column.id] = false;
+                    ec.errmsg[column.id] = ec.msgs.TYPEERROR;
                     return false;
                 }
                 break;
-            case 4://Date
-                if (!this.isDate(value)) {
-                    this.err[column.id] = false;
-                    this.errmsg[column.id] = this.msgs.DATE;
+            case ec.types.DATE://Date
+                if (!ec.isDate(value)) {
+                    ec.err[column.id] = false;
+                    ec.errmsg[column.id] = ec.msgs.DATE;
                     return false;
                 }
                 break;
             default:
-                this.err[column.id] = false;
-                this.errmsg[column.id] = this.msgs.TYPEERROR;
+                ec.err[column.id] = false;
+                ec.errmsg[column.id] = ec.msgs.TYPEERROR;
                 return false;
                 break;
         }
@@ -562,18 +562,18 @@ var easyconf = new Object({
 
     isDate:function(value) {
         console.log(value);
-        return this.dateRE.test(value);
+        return ec.dateRE.test(value);
     },
 
     selfCheck:function(column) {
-        value = this.detailContent[column.id];
+        value = ec.detailContent[column.id];
         check = column.check;
         for (var i=0; i<check.length; i++) {
             func = check[i];
-            shell = "easyconf." + func.funcname + "(\"" + value + "\"";
+            shell = "easyconf.userfunc." + func.funcname + "(\"" + value + "\"";
             argument = func.argument;
             for (var j=0; j<argument.length; j++) {
-                arg = this.detailContent[argument[i]];
+                arg = ec.detailContent[argument[i]];
                 if (arg == null) {
                     arg = "";
                 }
@@ -582,8 +582,8 @@ var easyconf = new Object({
             shell += ")";
             console.log("[shell]" + shell);
             if (!eval(shell)) {
-                this.err[column.id] = false;
-                this.errmsg[column.id] = func.errmsg;
+                ec.err[column.id] = false;
+                ec.errmsg[column.id] = func.errmsg;
                 return false;
             }
         }
@@ -591,11 +591,11 @@ var easyconf = new Object({
     },
 
     isUnique:function() {
-        columns = this.conf.columns;
+        columns = ec.conf.columns;
         for (var i=0; i<columns.length; i++) {
             column = columns[i];
             if (column.isPrimaryKey) {
-                if (this.primaryKeyContent[column.id] == null || this.detailContent[column.id] != this.primaryKeyContent[column.id]) {
+                if (ec.primaryKeyContent[column.id] == null || ec.detailContent[column.id] != ec.primaryKeyContent[column.id]) {
                     return true;
                 }
             }
@@ -604,50 +604,50 @@ var easyconf = new Object({
     },
 
     setUniqueMsg:function(isCorrect) {
-        columns = this.conf.columns;
+        columns = ec.conf.columns;
         for (var i=0; i<columns.length; i++) {
             column = columns[i];
             if (column.isPrimaryKey) {
                 if (isCorrect) {
-                    if (this.primaryKeyContent[column.id] != null && this.detailContent[column.id] == this.primaryKeyContent[column.id]) {
-                        this.err[column.id] = true;
-                        this.errmsg[column.id] = this.msgs.OK
+                    if (ec.primaryKeyContent[column.id] != null && ec.detailContent[column.id] == ec.primaryKeyContent[column.id]) {
+                        ec.err[column.id] = true;
+                        ec.errmsg[column.id] = ec.msgs.OK
                     }
                 }
                 else {
-                    this.err[column.id] = false;
-                    this.errmsg[column.id] = this.msgs.NOTUNIQUE;
+                    ec.err[column.id] = false;
+                    ec.errmsg[column.id] = ec.msgs.NOTUNIQUE;
                 }
             }
         }
     },
 
     setUniqueCorrect:function() {
-        this.setUniqueMsg(true);
+        ec.setUniqueMsg(true);
     },
 
     setUniqueError:function() {
-        this.setUniqueMsg(false);
+        ec.setUniqueMsg(false);
     },
 
     checkUnique:function() {
-        if (!this.isUnique()){
-            this.setUniqueError();
+        if (!ec.isUnique()){
+            ec.setUniqueError();
             return false;
         }
-        this.setUniqueCorrect();
+        ec.setUniqueCorrect();
         return true;
     },
 
     setOK:function(column) {
-        this.err[column.id] = true;
-        this.errmsg[column.id] = this.msgs.OK;
+        ec.err[column.id] = true;
+        ec.errmsg[column.id] = ec.msgs.OK;
     },
 
     allOK:function() {
         var i = 0;
-        for (k in this.err) {
-            if (!this.err[k]) {
+        for (k in ec.err) {
+            if (!ec.err[k]) {
                 return false;
             }
             i += 1;
@@ -661,23 +661,166 @@ var easyconf = new Object({
     },
 
     allCheck:function() {
-        columns = this.conf.columns;
+        columns = ec.conf.columns;
         for (var i=0; i<columns.length; i++) {
             column = columns[i];
-            this.check[column.id]();
+            ec.check[column.id]();
         }
     },
 
     isColFlexible:function(column) {
-        return (column.candidate == this.candidates.FLEXIBLE);
+        return (column.candidate == ec.candidates.FLEXIBLE);
+    },
+
+    getSelectHint:function(column) {
+        return ec.selectHints[column.selectType];
+    },
+
+    setDefaultValue:function() {
+        columns = ec.conf.columns;
+        for (var i=0; i<columns.length; i++) {
+            column = columns[i];
+            ec.detailContent[column.id] = column.dft;
+        }
+    },
+    
+    // public method for encoding
+    encode : function (input) {
+        var output = "";
+        var chr1, chr2, chr3, enc1, enc2, enc3, enc4;
+        var i = 0;
+
+        input = ec._utf8_encode(input);
+
+        while (i < input.length) {
+
+            chr1 = input.charCodeAt(i++);
+            chr2 = input.charCodeAt(i++);
+            chr3 = input.charCodeAt(i++);
+
+            enc1 = chr1 >> 2;
+            enc2 = ((chr1 & 3) << 4) | (chr2 >> 4);
+            enc3 = ((chr2 & 15) << 2) | (chr3 >> 6);
+            enc4 = chr3 & 63;
+
+            if (isNaN(chr2)) {
+                enc3 = enc4 = 64;
+            } else if (isNaN(chr3)) {
+                enc4 = 64;
+            }
+
+            output = output +
+            this._keyStr.charAt(enc1) + this._keyStr.charAt(enc2) +
+            this._keyStr.charAt(enc3) + this._keyStr.charAt(enc4);
+
+        }
+
+        return output;
+    },
+
+    // public method for decoding
+    decode : function (input) {
+        var output = "";
+        var chr1, chr2, chr3;
+        var enc1, enc2, enc3, enc4;
+        var i = 0;
+
+        input = input.replace(/[^A-Za-z0-9\+\/\=]/g, "");
+
+        while (i < input.length) {
+
+            enc1 = this._keyStr.indexOf(input.charAt(i++));
+            enc2 = this._keyStr.indexOf(input.charAt(i++));
+            enc3 = this._keyStr.indexOf(input.charAt(i++));
+            enc4 = this._keyStr.indexOf(input.charAt(i++));
+
+            chr1 = (enc1 << 2) | (enc2 >> 4);
+            chr2 = ((enc2 & 15) << 4) | (enc3 >> 2);
+            chr3 = ((enc3 & 3) << 6) | enc4;
+
+            output = output + String.fromCharCode(chr1);
+
+            if (enc3 != 64) {
+                output = output + String.fromCharCode(chr2);
+            }
+            if (enc4 != 64) {
+                output = output + String.fromCharCode(chr3);
+            }
+
+        }
+
+        output = ec._utf8_decode(output);
+
+        return output;
+
+    },
+
+    // private method for UTF-8 encoding
+    _utf8_encode : function (string) {
+        string = string.replace(/\r\n/g,"\n");
+        var utftext = "";
+
+        for (var n = 0; n < string.length; n++) {
+
+            var c = string.charCodeAt(n);
+
+            if (c < 128) {
+                utftext += String.fromCharCode(c);
+            }
+            else if((c > 127) && (c < 2048)) {
+                utftext += String.fromCharCode((c >> 6) | 192);
+                utftext += String.fromCharCode((c & 63) | 128);
+            }
+            else {
+                utftext += String.fromCharCode((c >> 12) | 224);
+                utftext += String.fromCharCode(((c >> 6) & 63) | 128);
+                utftext += String.fromCharCode((c & 63) | 128);
+            }
+
+        }
+
+        return utftext;
+    },
+
+    // private method for UTF-8 decoding
+    _utf8_decode : function (utftext) {
+        var string = "";
+        var i = 0;
+        var c = c1 = c2 = 0;
+
+        while ( i < utftext.length ) {
+
+            c = utftext.charCodeAt(i);
+
+            if (c < 128) {
+                string += String.fromCharCode(c);
+                i++;
+            }
+            else if((c > 191) && (c < 224)) {
+                c2 = utftext.charCodeAt(i+1);
+                string += String.fromCharCode(((c & 31) << 6) | (c2 & 63));
+                i += 2;
+            }
+            else {
+                c2 = utftext.charCodeAt(i+1);
+                c3 = utftext.charCodeAt(i+2);
+                string += String.fromCharCode(((c & 15) << 12) | ((c2 & 63) << 6) | (c3 & 63));
+                i += 3;
+            }
+
+        }
+
+        return string;
     },
 
     // user's function here
-    testfunc1:function(arg1, arg2, arg3) {
-        return true;
-    },
+    userfunc: {
+        testfunc1:function(arg1, arg2, arg3) {
+            return true;
+        },
 
-    testfunc2:function(arg1, arg2) {
-        return true;
+        testfunc2:function(arg1, arg2) {
+            return true;
+        }
     }
 });

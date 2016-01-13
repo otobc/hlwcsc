@@ -20,6 +20,7 @@
                     <table>
                         <tr ng-repeat="column in easyconf.conf.columns" ng-show="column.isSelect">
                             <td ng-cloak>{{ column.name }}</td>
+                            <td ng-cloak>{{ easyconf.getSelectHint(column) }}</td>
                             <td><input type=text ng-disabled="easyconf.disabled" ng-model="query[column.id]"></td>
                         </tr>
                         <tr>
