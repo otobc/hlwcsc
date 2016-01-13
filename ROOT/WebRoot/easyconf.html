@@ -21,7 +21,7 @@
                         <tr ng-repeat="column in easyconf.conf.columns" ng-show="column.isSelect">
                             <td ng-cloak>{{ column.name }}</td>
                             <td ng-cloak>{{ easyconf.getSelectHint(column) }}</td>
-                            <td><input type=text ng-disabled="easyconf.disabled" ng-model="query[column.id]"></td>
+                            <td><input type="text" ng-disabled="easyconf.disabled" ng-model="query[column.id]"></td>
                         </tr>
                         <tr>
                             <td><button ng-cloak ng-disabled="easyconf.disabled" ng-click="search()">{{ easyconf.names.SEARCH }}</button></td>
@@ -49,8 +49,8 @@
                             <td ng-cloak ng-repeat="column in easyconf.conf.columns" ng-show="column.isShow">
                                 {{ column.name }}
                             </td>
-                            <td>
-                            OPERARION
+                            <td ng-cloak>
+                                {{ easyconf.names.OPERATIONS }}
                             </td>
                         </tr>
                         <tr id = "listContentRow" ng-repeat="row in easyconf.listContent" ng-controller="listContentRow">
@@ -88,7 +88,7 @@
                     <button ng-cloak ng-disabled="easyconf.disabled" ng-click="fresh()">{{ easyconf.names.FRESH }}</button>
                     <button ng-cloak ng-disabled="easyconf.disabled" ng-click="prev()">{{ easyconf.names.PREV }}</button>
                     <button ng-cloak ng-disabled="easyconf.disabled" ng-click="next()">{{ easyconf.names.NEXT }}</button>
-                    <input type=text ng-disabled="easyconf.disabled" ng-model="page">
+                    <input type="text" ng-disabled="easyconf.disabled" ng-model="page">
                     <button ng-cloak ng-disabled="easyconf.disabled || !easyconf.isPstInt(page)" ng-click="go()">{{ easyconf.names.GO }}</button>
                 </div>
                 <script>
@@ -118,8 +118,7 @@
                         <tr ng-repeat="column in easyconf.conf.columns" ng-controller="detailContentRow">
                             <td ng-cloak>{{ column.name }}</td>
                             <td>
-                                <input type=text ng-if="easyconf.isColText(column)" ng-disabled="easyconf.disabled || easyconf.isDetailDisable(column)" ng-change="change()" ng-model="easyconf.detailContent[column.id]" />
-                                <input type=radio ng-if="easyconf.isColRadio(column)" ng-disabled="easyconf.disabled || easyconf.isDetailDisable(column)" ng-change="change()" ng-model="easyconf.detailContent[column.id]" />
+                                <input type="text" ng-if="easyconf.isColText(column)" ng-disabled="easyconf.disabled || easyconf.isDetailDisable(column)" ng-change="change()" ng-model="easyconf.detailContent[column.id]" />
                                 <select ng-if="easyconf.isColCbox(column)" ng-disabled="easyconf.disabled || easyconf.isDetailDisable(column)" ng-focus="focus()" ng-change="change()" ng-options="c.key as c.value for c in easyconf.range[column.id]" ng-model=easyconf.detailContent[column.id]></select>
                             </td>
                             <td ng-cloak ng-show="easyconf.isMsgShow()">

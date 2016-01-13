@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <script src="./angular.min.js"></script> 
+        <script src="./echarts.min.js"></script> 
+        <script src="./easyconf.js"></script> 
+        <script src="./evaluate.js"></script> 
+    </head>
+    <body>
+        <div id="main" ng-show="evaluate.isInit" ng-app="admin" ng-controller="main">
+            <script>
+                var app = angular.module("admin", []);
+            </script>
+            <div ng-cloak id="title">
+                <h1>{{ evaluate.names.EVALUATE }} </h1>
+            </div>
+            <div id="query" ng-controller="query">
+                <table>
+                    <tr>
+                        <td ng-cloak>{{ evaluate.names.EVALUATEID }}</td>
+                        <td><select ng-disabled="evaluate.disabled" ng-focus="focus()" ng-options="c.key as c.value for c in easyconf.range.id" ng-model="evaluate.id"></select></td>
+                    </tr>
+                    <tr>
+                        <td ng-cloak>{{ evaluate.names.ISREADCACHE }}</td>
+                        <td><select ng-disabled="evaluate.disabled" ng-options="c.key as c.value for c in evaluate.range.isReadCache" ng-model="evaluate.isReadCache"></select></td>
+                    </tr>
+                    <tr>
+                        <td><button ng-cloak ng-disabled="evaluate.disabled || evaluate.isNull(evaluate.id) || evaluate.isNull(evaluate.isReadCache)" ng-click="commit()">{{ evaluate.names.COMMIT }}</button></td>
+                    </tr>
+                </table>
+            </div>
+            <script>
+                app.controller(
+                    "query",
+                    function($scope, $http) {
+                        $scope.commit = function() {
+                            evaluate.commit($http);
+                        }
+                        $scope.focus = function() {
+                            column = {id:"id", candidate:easyconf.candidates.FLEXIBLE, flexible:{table:evaluate.table, key:evaluate.key, value:evaluate.value, where:[]}};
+                            easyconf.focus($http, column);
+                        }
+                        $scope.change = function() {
+                            console.log(evaluate.isReadCache);
+                        }
+                    }
+                )
+            </script>
+            <div id="info" ng-show="evaluate.isEvaluated">
+                <table>
+                    <tr>
+                        <td ng-cloak>
+                            {{ evaluate.names.EXPERIMENTID }}
+                        </td ng-cloak>
+                        <td ng-cloak>
+                            {{ evaluate.experimentinfo.id }}
+                        </td>
+                        <td ng-cloak>
+                            {{ evaluate.names.EXPERIMENTNAME }}
+                        </td ng-cloak>
+                        <td ng-cloak>
+                            {{ evaluate.experimentinfo.name }}
+                        </td>
+                        <td ng-cloak>
+                            {{ evaluate.names.WEAPONTYPE }}
+                        </td>
+                        <td ng-cloak>
+                            {{ evaluate.experimentinfo.weaponType }}
+                        </td>
+                    </tr>
+                    <tr>
+                        <td ng-cloak>
+                            {{ evaluate.names.TESTER }}
+                        </td ng-cloak>
+                        <td ng-cloak>
+                            {{ evaluate.experimentinfo.tester }}
+                        </td>
+                        <td ng-cloak>
+                            {{ evaluate.names.BEGINTIME }}
+                        </td>
+                        <td ng-cloak>
+                            {{ evaluate.experimentinfo.beginTime }}
+                        </td>
+                        <td ng-cloak>
+                            {{ evaluate.names.ENDTIME }}
+                        </td>
+                        <td ng-cloak>
+                            {{ evaluate.experimentinfo.endTime }}
+                        </td>
+                    </tr>
+                </table>
+            </div>
+            <div id="graph" ng-controller="graph" style="width: 400px;height:400px;"></div>
+            <script>
+                app.controller(
+                    "graph", 
+                    function($scope, $http) {
+                        var myChart = echarts.init(document.getElementById('graph'));
+                        evaluate.setChart(myChart);
+                    }
+                );
+            </script>
+        </div>
+        <script>
+            app.controller(
+                "main", 
+                function($scope, $http) {
+                    $scope.easyconf = easyconf;
+                    $scope.evaluate = evaluate;
+                    easyconf.init($http, "");
+                    evaluate.init();
+                }
+            );
+        </script>
+    </body>
+</html>

@@ -20,7 +20,8 @@ var easyconf = new Object({
         NEXT:"NEXT",
         GO:"GO",
         RETURN:"RETURN",
-        COMMIT:"COMMIT"
+        COMMIT:"COMMIT",
+        OPERATIONS:"OPERATIONS"
     },
     types:{
         STRING:0,
@@ -41,8 +42,7 @@ var easyconf = new Object({
     },
     controls:{
         TEXT:0,
-        RADIO:1,
-        CBOX:2
+        CBOX:1
     },
     views:{
         LIST:0,
@@ -484,10 +484,6 @@ var easyconf = new Object({
         return (column.control == ec.controls.TEXT);
     },
 
-    isColRadio:function(column) {
-        return (column.control == ec.controls.RADIO);
-    },
-    
     isColCbox:function(column) {
         return (column.control == ec.controls.CBOX);
     },
@@ -538,11 +534,7 @@ var easyconf = new Object({
                 }
                 break;
             case ec.types.BOOLEAN://Boolean
-                if (column.control != ec.controls.RADIO) {
-                    ec.err[column.id] = false;
-                    ec.errmsg[column.id] = ec.msgs.TYPEERROR;
-                    return false;
-                }
+                // NOTHING TO DO
                 break;
             case ec.types.DATE://Date
                 if (!ec.isDate(value)) {
