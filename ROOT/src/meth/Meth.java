@@ -3,11 +3,15 @@ package meth;
 import java.lang.Math;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import db.DBConnect;
+import basic.IdxSts;
+import basic.LvlSts;
 import basic.Sts;
 import basic.Definition;
 
@@ -21,8 +25,11 @@ public class Meth {
 		@SuppressWarnings("unused")
 		public double threshold1(Sts sts, Object value) throws Exception {
 			double ret = 0.0;
-			if (value instanceof Number) {
-				ret = (double)sts.max / (double)value;
+			if (value instanceof Long) {
+				ret = (long)value * 1.0 / sts.lmax * 1.0;
+			}
+			else if(value instanceof Double) {
+				ret = (double)value / sts.dmax;
 			}
 			else
 			{
@@ -34,9 +41,14 @@ public class Meth {
 		@SuppressWarnings("unused")
 		public double threshold2(Sts sts, Object value) throws Exception {
 			double ret = 0.0;
-			if (value instanceof Number) {	
-				double max = (double)sts.max;
-				double min = (double)sts.min;
+			if (value instanceof Long) {	
+				long max = sts.lmax;
+				long min = sts.lmin;
+				ret = (max + min - (long)value) * 1.0 / max;
+			}
+			else if (value instanceof Double) {	
+				double max = sts.dmax;
+				double min = sts.dmin;
 				ret = (max + min - (double)value) / max;
 			}
 			else
@@ -49,14 +61,24 @@ public class Meth {
 		@SuppressWarnings("unused")
 		public double threshold3(Sts sts, Object value) throws Exception {
 			double ret = 0.0;
-			if (value instanceof Number) {	
-				double max = (double)sts.max;
-				double min = (double)sts.min;
+			if (value instanceof Long) {	
+				long max = sts.lmax;
+				long min = sts.lmin;
 				if (Math.abs(max - min) < Definition.threhold) {
 					ret = 0.5;
 				}
 				else {
-					ret = (max-(double)value) / (max-min);
+					ret = (max-(long)value) * 1.0 / (max-min);
+				}
+			}
+			else if (value instanceof Double) {	
+				double max = sts.dmax;
+				double min = sts.dmin;
+				if (Math.abs(max - min) < Definition.threhold) {
+					ret = 0.5;
+				}
+				else {
+					ret = (max-(long)value) / (max-min);
 				}
 			}
 			else
@@ -69,14 +91,24 @@ public class Meth {
 		@SuppressWarnings("unused")
 		public double threshold4(Sts sts, Object value) throws Exception {
 			double ret = 0.0;
-			if (value instanceof Number) {	
-				double max = (double)sts.max;
-				double min = (double)sts.min;
+			if (value instanceof Long) {	
+				long max = sts.lmax;
+				long min = sts.lmin;
 				if (Math.abs(max - min) < Definition.threhold) {
 					ret = 0.5;
 				}
 				else {
-					ret = ((double)value-min) / (max-min);
+					ret = ((long)value-min) * 1.0 / (max-min);
+				}
+			}
+			else if (value instanceof Double) {	
+				double max = sts.dmax;
+				double min = sts.dmin;
+				if (Math.abs(max - min) < Definition.threhold) {
+					ret = 0.5;
+				}
+				else {
+					ret = ((long)value-min) / (max-min);
 				}
 			}
 			else
@@ -89,9 +121,17 @@ public class Meth {
 		@SuppressWarnings("unused")
 		public double normalize(Sts sts, Object value) throws Exception {
 			double ret = 0.0;
-			if (value instanceof Number) {	
-				double avg = (double)sts.avg;
-				double var = (double)sts.var;
+			if (value instanceof Number) {
+				double avg = 0.0;
+				double var = 0.0;
+				if (value instanceof Long) {	
+					avg = (double)sts.lavg;
+					var = (double)sts.lvar;
+				}
+				else if (value instanceof Double) {	
+					avg = (double)sts.davg;
+					var = (double)sts.dvar;
+				}
 				if (Math.abs(var) < Definition.threhold) {
 					ret = 0.5;
 				}
@@ -182,13 +222,25 @@ public class Meth {
 		}
 		
 		@SuppressWarnings("unused")
-		public double cweighting(double weight, double score){
-			return weight * score;
+		public double cweighting(List<Double> weight, List<Double> score){
+			double ret = 0.0;
+			int idx = 0;
+			for (Iterator<Double> i = weight.iterator();i.hasNext();) {
+				ret += i.next() * score.get(idx);
+				idx += 1;
+			}
+			return ret;
 		}
 		
 		@SuppressWarnings("unused")
-		public double gweighting(double weight, double score){
-			return Math.pow(score, weight);
+		public double gweighting(List<Double> weight, List<Double> score){
+			double ret = 1.0;
+			int idx = 0;
+			for (Iterator<Double> i = weight.iterator();i.hasNext();) {
+				ret *= Math.pow(i.next(), score.get(idx));
+				idx += 1;
+			}
+			return ret;
 		}
 	}
 	
@@ -208,8 +260,8 @@ public class Meth {
 		gemtd.put("03", InnerMeth.class.getMethod("avgmbsp2", List.class, List.class));
 		
 		wtmtd = new HashMap<String, Method>();
-		wtmtd.put("01", InnerMeth.class.getMethod("cweighting", double.class, double.class));
-		wtmtd.put("02", InnerMeth.class.getMethod("gweighting", double.class, double.class));
+		wtmtd.put("01", InnerMeth.class.getMethod("cweighting", List.class, List.class));
+		wtmtd.put("02", InnerMeth.class.getMethod("gweighting", List.class, List.class));
 	}
 	
 	// 公共无量纲化函数入口
@@ -229,11 +281,41 @@ public class Meth {
 	}
 
 	// 公共加权计算函数入口
-	public static int exewt(String id, double weight, double score) throws IllegalAccessException, IllegalArgumentException, InvocationTargetException {
-		int ret = 0;
+	public static double exewt(String id, List<Double> vct, List<Double> lvl) throws IllegalAccessException, IllegalArgumentException, InvocationTargetException {
+		double ret = 0;
 		Method method = (Method)wtmtd.get(id);
-		ret = (int)method.invoke(meth, weight, score);
+		ret = (double)method.invoke(meth, vct, lvl);
 		return ret;
 	}
 	
+	@SuppressWarnings("unused")
+	public static void main(String[] args) throws Exception {
+		Meth mth = new Meth();
+		DBConnect.setDbInfo();
+		Object value = Long.valueOf("2");
+		
+		Sts sts = new IdxSts();
+		sts.setSts("1");
+		System.out.println(sts);
+		double nmv = exenm("04", sts, value);
+		System.out.println("nmv:" + nmv);
+		
+		sts = new LvlSts();
+		List<Integer> lvl = new ArrayList<Integer>();
+		lvl.add(1);lvl.add(2);lvl.add(3);
+		sts.setSts(lvl);
+		System.out.println(sts);
+		nmv = exenm("01", sts, value);
+		System.out.println("nmv:" + nmv);
+		
+		List<Double> vct = new ArrayList<Double>();
+		vct.add(Double.valueOf("0.5"));vct.add(Double.valueOf("0.3"));vct.add(Double.valueOf("0.2"));
+		int gev = exege("03", vct, lvl);
+		System.out.println("gev:" + gev);
+		
+		List<Double> sc = new ArrayList<Double>();
+		sc.add(Double.valueOf("0.5"));sc.add(Double.valueOf("0.3"));sc.add(Double.valueOf("0.2"));
+		double wtv = exewt("02", vct, sc);
+		System.out.println("wtv:" + wtv);
+	}	
 }
