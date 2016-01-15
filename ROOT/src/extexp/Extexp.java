@@ -1,17 +1,21 @@
 package extexp;
 
 import java.util.*;
+import java.sql.Connection;
+import java.sql.Statement;
+import java.sql.ResultSet;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 
 import org.wltea.expression.*;
 import org.wltea.expression.datameta.Variable;
 
+import db.DBConnect;
 import basic.Definition;
 
 public class Extexp {
-	private static SimpleDateFormat dateFm = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.ms");	
-	private static Random random = new Random(100);
+	private static SimpleDateFormat dateFm = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SS");	
+//	private static Random random = new Random(100);
 	
 	// 日期转换
 	public static Date todate(String date) throws ParseException {
@@ -28,27 +32,73 @@ public class Extexp {
 	
 	// 原始数据提取
 	@SuppressWarnings("rawtypes")
-	public static List<List<List<Comparable>>> select(String id, String environmentid, Date begintime, Date endtime) throws InterruptedException {
+	public static List<List<List<Comparable>>> select(String id, String environmentid, Date begintime, Date endtime) throws Exception {
 		List<List<List<Comparable>>> ret = new ArrayList<List<List<Comparable>>>(); 
 
-		// TODO
-		id = String.format("%08d", random.nextInt(100));
-		for (int i = 0; i < 5; i++) {
-			List<List<Comparable>> group = new ArrayList<List<Comparable>>();
-			Date date = new java.util.Date();
-			for (int j = 0; j < 10; j++) {
-				List<Comparable> nodedata = new ArrayList<Comparable>();
-				nodedata.add(id);
-				nodedata.add(String.format("第%s组的原始数据", id));
-				nodedata.add("00000000");
-				nodedata.add(String.format("%08d", i*10+j));
-				nodedata.add(random.nextLong());
-				nodedata.add(date);
-				group.add(nodedata);
+
+//		id = String.format("%08d", random.nextInt(100));
+//		for (int i = 0; i < 5; i++) {
+//			List<List<Comparable>> group = new ArrayList<List<Comparable>>();
+//			Date date = new java.util.Date();
+//			for (int j = 0; j < 10; j++) {
+//				List<Comparable> nodedata = new ArrayList<Comparable>();
+//				nodedata.add(id);
+//				nodedata.add(String.format("第%s组的原始数据", id));
+//				nodedata.add("00000000");
+//				nodedata.add(String.format("%08d", i*10+j));
+//				nodedata.add(random.nextLong());
+//				nodedata.add(date);
+//				group.add(nodedata);
+//			}
+//			ret.add(group);
+//			Thread.sleep(1000);
+//		}
+		
+		
+		Connection connection = DBConnect.connect();
+		Statement stat = connection.createStatement();
+		String sql = "select * from rawdata where id = \"" + id + "\" and environmentid = \"" + environmentid + "\" order by time;";
+
+		ResultSet rs = stat.executeQuery(sql);
+		String lastTime = null; 
+		List<List<Comparable>> group = null;
+		while (rs.next()) {
+			List<Comparable> nodedata = new ArrayList<Comparable>();
+			nodedata.add(rs.getString("id"));
+			nodedata.add(rs.getString("name"));
+			nodedata.add(rs.getString("environmentid"));
+			nodedata.add(rs.getString("nodeid"));
+			String dataType = rs.getString("datatype");
+			if (dataType.equals(Definition.Datatype.STRING)) {
+				nodedata.add(rs.getString("value"));
 			}
-			ret.add(group);
-			Thread.sleep(1000);
+			else if (dataType.equals(Definition.Datatype.LONG)) {
+				nodedata.add(rs.getLong("value"));
+			}
+			else if (dataType.equals(Definition.Datatype.DOUBLE)) {
+				nodedata.add(rs.getDouble("value"));
+			}
+			else if (dataType.equals(Definition.Datatype.BOOLEAN)) {
+				nodedata.add(rs.getBoolean("value"));
+			}
+			else {
+				throw new Exception(String.format("select，错误的数据类型"));
+			}
+			String time =  rs.getString("time");
+			nodedata.add(todate(time));
+			if (!time.equals(lastTime)) {
+				if (lastTime != null)
+				{
+					ret.add(group);
+					
+				}
+				group = new ArrayList<List<Comparable>>();
+			}
+			group.add(nodedata);
+			lastTime = time;
 		}
+		ret.add(group);
+		connection.close();
 		return ret;
 	}
 	
@@ -97,6 +147,7 @@ public class Extexp {
 						datamax_l = datavalue_l > datamax_l ? datavalue_l : datamax_l;
 						datamin_l = datavalue_l < datamin_l ? datavalue_l : datamin_l;
 					}
+					
 					datasum_l += datavalue_l;
 				}
 				else if (datavalue instanceof Double) {
@@ -128,7 +179,7 @@ public class Extexp {
 			switch (flag) {
 			case Definition.MergeBasicArgs.AVG:
 				if (datavalue instanceof Long) {
-					dataavg = datasum_l / 1.0 * group.size();
+					dataavg = datasum_l / (1.0 * group.size());
 				}
 				else {
 					dataavg = datasum_d / group.size();
@@ -346,21 +397,23 @@ public class Extexp {
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	public static void main(String[] args) throws Exception {
 
-		Date t = new Date();
+		Date t = todate("2016-01-15 13:44:22.00");
 		String expression = null;
 		List<Variable> variables = new ArrayList<Variable>();
 		variables.add(Variable. createVariable ("t", t));
 		
-		expression = "$SELECT(\"A\", \"B\", $TODATE(\"2016-01-06 10:00:00.00\"), $TODATE(\"2016-01-06 10:03:00.00\"))";
+		DBConnect.setDbInfo();
+		
+		expression = "$SELECT(\"00000015\", \"00000000\", $TODATE(\"2016-01-06 10:00:00.00\"), $TODATE(\"2016-01-06 10:03:00.00\"))";
 		List<List<List<Comparable>>> rawdata = (List<List<List<Comparable>>>)ExpressionEvaluator. evaluate (expression, variables);
-		System.out.println(rawdata);
+		System.out.println("rawdata:" +rawdata);
 		
-		expression = "$MERGE_BASIC($SELECT(\"A\", \"B\", $TODATE(\"2016-01-06 10:00:00.00\"), $TODATE(\"2016-01-06 10:03:00.00\")), 1)";
+		expression = "$MERGE_BASIC($SELECT(\"00000015\", \"00000000\", $TODATE(\"2016-01-06 10:00:00.00\"), $TODATE(\"2016-01-06 10:03:00.00\")), 0)";
 		List<List<Comparable>> mergedata = (List<List<Comparable>>)ExpressionEvaluator. evaluate (expression, variables);		
-		System.out.println(mergedata);
+		System.out.println("mergedata:" + mergedata);
 		
-		expression = "$ESTIMATE_BASIC($MERGE_BASIC($SELECT(\"A\", \"B\", $TODATE(\"2016-01-06 10:00:00.00\"), $TODATE(\"2016-01-06 10:03:00.00\")), 1), t, 0)";
+		expression = "$ESTIMATE_BASIC($MERGE_BASIC($SELECT(\"00000015\", \"00000000\", $TODATE(\"2016-01-06 10:00:00.00\"), $TODATE(\"2016-01-06 10:03:00.00\")), 0), t, 3)";
 		Object estimatedata = ExpressionEvaluator. evaluate (expression, variables);
-		System.out.println(estimatedata);
+		System.out.println("estimatedata:" + estimatedata);
 	}
 }
