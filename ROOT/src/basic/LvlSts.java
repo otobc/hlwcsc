@@ -4,14 +4,14 @@ import java.util.Iterator;
 import java.util.List;
 
 public class LvlSts extends Sts {
+	List<Integer> level;
 
-	@Override
-	public void setSts(String id) throws Exception {
-		throw new Exception(String.format("不支持该功能"));
+	public LvlSts(List<Integer> level) {
+		this.level = level;
 	}
 
 	@Override
-	public void setSts(List<Integer> level) {
+	public void setSts() {
 		long lmax = 0;
 		double dmax = 0.0;
 		long lmin = 0;

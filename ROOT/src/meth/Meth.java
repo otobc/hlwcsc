@@ -24,6 +24,7 @@ public class Meth {
 	private static class InnerMeth {
 		@SuppressWarnings("unused")
 		public double threshold1(Sts sts, Object value) throws Exception {
+			sts.setSts();
 			double ret = 0.0;
 			if (value instanceof Long) {
 				ret = (long)value * 1.0 / sts.lmax * 1.0;
@@ -40,6 +41,7 @@ public class Meth {
 		
 		@SuppressWarnings("unused")
 		public double threshold2(Sts sts, Object value) throws Exception {
+			sts.setSts();
 			double ret = 0.0;
 			if (value instanceof Long) {	
 				long max = sts.lmax;
@@ -60,6 +62,7 @@ public class Meth {
 		
 		@SuppressWarnings("unused")
 		public double threshold3(Sts sts, Object value) throws Exception {
+			sts.setSts();
 			double ret = 0.0;
 			if (value instanceof Long) {	
 				long max = sts.lmax;
@@ -90,6 +93,7 @@ public class Meth {
 		
 		@SuppressWarnings("unused")
 		public double threshold4(Sts sts, Object value) throws Exception {
+			sts.setSts();
 			double ret = 0.0;
 			if (value instanceof Long) {	
 				long max = sts.lmax;
@@ -120,6 +124,7 @@ public class Meth {
 		
 		@SuppressWarnings("unused")
 		public double normalize(Sts sts, Object value) throws Exception {
+			sts.setSts();
 			double ret = 0.0;
 			if (value instanceof Number) {
 				double avg = 0.0;
@@ -148,6 +153,7 @@ public class Meth {
 		
 		@SuppressWarnings("unused")
 		public double bool1(Sts sts, Object value) throws Exception {
+			// sts.setSts();
 			double ret = 0.0;
 			if (value instanceof Boolean) {
 				ret = (boolean)value ? 1.0 : 0.0;
@@ -161,6 +167,7 @@ public class Meth {
 		
 		@SuppressWarnings("unused")
 		public double bool2(Sts sts, Object value) throws Exception {
+			sts.setSts();
 			double ret = 0.0;
 			if (value instanceof Boolean) {
 				double tp = (double)sts.tp; 
@@ -294,19 +301,19 @@ public class Meth {
 		DBConnect.setDbInfo();
 		Object value = Long.valueOf("2");
 		
-		Sts sts = new IdxSts();
-		sts.setSts("1");
-		System.out.println(sts);
+		Sts sts = new IdxSts("1");
+
 		double nmv = exenm("04", sts, value);
 		System.out.println("nmv:" + nmv);
-		
-		sts = new LvlSts();
+		System.out.println(sts);		
+
 		List<Integer> lvl = new ArrayList<Integer>();
 		lvl.add(1);lvl.add(2);lvl.add(3);
-		sts.setSts(lvl);
-		System.out.println(sts);
+		sts = new LvlSts(lvl);
+		
 		nmv = exenm("01", sts, value);
 		System.out.println("nmv:" + nmv);
+		System.out.println(sts);
 		
 		List<Double> vct = new ArrayList<Double>();
 		vct.add(Double.valueOf("0.5"));vct.add(Double.valueOf("0.3"));vct.add(Double.valueOf("0.2"));

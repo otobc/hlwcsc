@@ -3,13 +3,17 @@ package basic;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.Statement;
-import java.util.*;
-
 import db.DBConnect;
 
 public class IdxSts extends Sts {
+	private String id;
+	
+	public IdxSts(String id) {
+		this.id = id;
+	}
+	
 	@Override
-	public void setSts(String id) throws Exception {
+	public void setSts() throws Exception {
 		
 		long lmax = 0;
 		double dmax = 0.0;
@@ -105,10 +109,4 @@ public class IdxSts extends Sts {
 		this.dvar = dvar;
 		this.tp = tp;	
 	}
-
-	@Override
-	public void setSts(List<Integer> level) throws Exception {
-		throw new Exception(String.format("不支持该功能"));
-	}
-	
 }
