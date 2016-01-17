@@ -105,7 +105,7 @@ var easyconf = new Object({
         data = ec.getShowCol();
         
         ec.lock();
-//        http.get(ec.apps.LIST, {params:{table:ec.table, data:ec.list2str(data), query:ec.dict2str(query)}}).success(
+//        http.get(ec.apps.LIST, {params:{table:ec.table, data:ec.list2str(data), query:ec.dict2str(query), begin:0, count:ec.conf.count}}).success(
         url = "./list.json";
         http.get(url).success(
             function(response) {
@@ -127,7 +127,7 @@ var easyconf = new Object({
         query = ec.getPKV(row);
         
         ec.lock();
-//        http.get(ec.apps.DETAIL, {params:{table:ec.table, query:ec.dict2str(query)}}).success(
+//        http.get(ec.apps.DETAIL, {params:{table:ec.table, query:ec.dict2str(query), begin:0, count:1}}).success(
         url = "./detail.json"
         http.get(url).success(
             function(response) {
@@ -158,7 +158,7 @@ var easyconf = new Object({
 
     jump:function(http) {
         ec.lock();
-//        http.get(ec.apps.LIST, {params:{table:ec.table, data:ec.list2str(data), query:ec.dict2str(ec.lastquery)}}).success(
+//        http.get(ec.apps.LIST, {params:{table:ec.table, data:ec.list2str(data), query:ec.dict2str(ec.lastquery), begin:ec.cursor, count:ec.conf.count}}).success(
         url = "./list.json";
         http.get(url).success(
             function(response) {
