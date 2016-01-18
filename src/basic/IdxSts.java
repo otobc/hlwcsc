@@ -3,7 +3,8 @@ package basic;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.Statement;
-import url_db.DBConnect;
+
+import db.DBConnect;
 
 public class IdxSts extends Sts {
 	private String id;

@@ -10,8 +10,8 @@ import java.text.SimpleDateFormat;
 import org.wltea.expression.*;
 import org.wltea.expression.datameta.Variable;
 
-import url_db.DBConnect;
 import basic.Definition;
+import db.DBConnect;
 
 public class Extexp {
 	private static SimpleDateFormat dateFm = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SS");	

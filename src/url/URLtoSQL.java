@@ -1,4 +1,4 @@
-package url_db;
+package url;
 
 import java.sql.Connection;
 import java.sql.ResultSet;

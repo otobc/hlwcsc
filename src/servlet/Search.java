@@ -2,6 +2,7 @@ package servlet;
 
 import java.io.IOException;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -9,9 +10,9 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import bean_json.BeanToJson;
-import url_db.DBConnect;
-import url_db.ExecuteSQL;
-import url_db.URLtoSQL;
+import db.DBConnect;
+import db.ExecuteSQL;
+import url.URLtoSQL;
 
 public class Search extends HttpServlet
 {
@@ -44,6 +45,12 @@ public class Search extends HttpServlet
 		System.out.println("searchJson=" + searchJson);
 
 		// 5.·¢ËÍjson¸øÇ°¶Ë
+		try {
+			DBConnect.closeConnection();
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		response.getOutputStream().write(searchJson.getBytes("utf-8"));
 		System.out.println("response successfully");
 

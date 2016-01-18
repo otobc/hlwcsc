@@ -1,4 +1,4 @@
-package url_db;
+package url;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;

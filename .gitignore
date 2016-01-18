@@ -17,5 +17,5 @@ hs_err_pid*
 .settings
 
 # Outter js
-angular.min.js
-echarts.min.js
+/angular.min.js/
+/echarts.min.js/

@@ -1,27 +1,27 @@
 var easyconf = new Object({
     // basic definition here, pls do not modify them 
     selectHints: {
-        0:"µÈÓÚ£º",
-        1:"°üº¬£º",
-        2:"Ð¡ÓÚ£º",
-        3:"´óÓÚ£º",
-        4:"Ð¡ÓÚµÈÓÚ£º",
-        5:"´óÓÚµÈÓÚ£º"
+        0:"ç­‰äºŽï¼š",
+        1:"åŒ…å«ï¼š",
+        2:"å°äºŽï¼š",
+        3:"å¤§äºŽï¼š",
+        4:"å°äºŽç­‰äºŽï¼š",
+        5:"å¤§äºŽç­‰äºŽï¼š"
     },
 
     names:{
-        SEARCH:"²éÕÒ",
-        INSERT:"ÐÂÔö",
-        DETAIL:"ÏêÇé",
-        UPDATE:"¸üÐÂ",
-        DELETE:"É¾³ý",
-        FRESH:"É¾³ý",
-        PREV:"ÉÏÒ³",
-        NEXT:"ÏÂÒ³",
-        GO:"Ìø×ª",
-        RETURN:"·µ»Ø",
-        COMMIT:"Ìá½»",
-        OPERATIONS:"²Ù×÷"
+        SEARCH:"æŸ¥æ‰¾",
+        INSERT:"æ–°å¢ž",
+        DETAIL:"è¯¦æƒ…",
+        UPDATE:"æ›´æ–°",
+        DELETE:"åˆ é™¤",
+        FRESH:"åˆ é™¤",
+        PREV:"ä¸Šé¡µ",
+        NEXT:"ä¸‹é¡µ",
+        GO:"è·³è½¬",
+        RETURN:"è¿”å›ž",
+        COMMIT:"æäº¤",
+        OPERATIONS:"æ“ä½œ"
     },
     types:{
         STRING:0,
@@ -30,15 +30,15 @@ var easyconf = new Object({
         BOOLEAN:3,
         DATE:4
     },
-    subTitles:['²éÕÒ', 'ÏêÇé', '¸üÐÂ', 'ÐÂÔö'],
+    subTitles:['æŸ¥æ‰¾', 'è¯¦æƒ…', 'æ›´æ–°', 'æ–°å¢ž'],
     msgs:{
-        OK:"Í¨¹ý",
-        NOTNULL:"²»ÔÊÐíÎª¿Õ",
-        INTEGER:"±ØÐëÎªÕûÊý",
-        DOUBLE:"±ØÐëÎªÊý×Ö",
-        TYPEERROR:"ÀàÐÍ´íÎó",
-        DATE:"±ØÐëÎªÈÕÆÚ:[YYYY-MM-DD hh:mm:ss.ms]",
-        NOTUNIQUE:"Êý¾ÝÒÑ´æÔÚ",
+        OK:"é€šè¿‡",
+        NOTNULL:"ä¸å…è®¸ä¸ºç©º",
+        INTEGER:"å¿…é¡»ä¸ºæ•´æ•°",
+        DOUBLE:"å¿…é¡»ä¸ºæ•°å­—",
+        TYPEERROR:"ç±»åž‹é”™è¯¯",
+        DATE:"å¿…é¡»ä¸ºæ—¥æœŸ:[YYYY-MM-DD hh:mm:ss.ms]",
+        NOTUNIQUE:"æ•°æ®å·²å­˜åœ¨",
     },
     controls:{
         TEXT:0,

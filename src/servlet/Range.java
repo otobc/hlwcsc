@@ -2,16 +2,17 @@ package servlet;
 
 import java.io.IOException;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import url_db.DBConnect;
-import url_db.ExecuteSQL;
-import url_db.URLtoSQL;
 import bean_json.BeanToJson;
+import db.DBConnect;
+import db.ExecuteSQL;
+import url.URLtoSQL;
 
 public class Range extends HttpServlet
 {
@@ -42,6 +43,12 @@ public class Range extends HttpServlet
 		System.out.println("rangeJson=" + rangeJson);
 
 		// 5.·¢ËÍjson¸øÇ°¶Ë
+		try {
+			DBConnect.closeConnection();
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		response.getOutputStream().write(rangeJson.getBytes("utf-8"));
 		System.out.println("response successfully");
 	}

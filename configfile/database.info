@@ -1,10 +1,4 @@
-mysql,jdbc:mysql://localhost/evaluation_config,root,123456
+org.sqlite,jdbc:sqlite:E:\workspace\tmp\evaluation_config.db,user,password
 **************************该配置文件仅第一行有效*********************
 格式说明：
-1.值与值之间用逗号分隔，第一个值为数据库类型，包括mysql、sqlite、oracle、sqlserver
-2.如果数据库型类为MySQL，则书写格式如下:
-	mysql:用户名:密码:数据库表名
-	示例:mysql,databaseURL,user,passwd
-3.如果数据库型类为Sqlite，则书写格式如下:
-
-	示例:
+1.值与值之间用逗号分隔，第一个值为数据库驱动库包名称，第二个值为jdbc url，第三个值为用户名，第四个值为密码（待加密）
