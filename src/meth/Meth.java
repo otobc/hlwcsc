@@ -9,7 +9,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import db.DBConnect;
 import basic.IdxSts;
 import basic.LvlSts;
 import basic.Sts;
@@ -298,7 +297,6 @@ public class Meth {
 	@SuppressWarnings("unused")
 	public static void main(String[] args) throws Exception {
 		Meth mth = new Meth();
-		DBConnect.setDbInfo();
 		Object value = Long.valueOf("2");
 		
 		Sts sts = new IdxSts("1");

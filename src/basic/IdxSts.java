@@ -3,7 +3,7 @@ package basic;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.Statement;
-import db.DBConnect;
+import url_db.DBConnect;
 
 public class IdxSts extends Sts {
 	private String id;
@@ -32,7 +32,7 @@ public class IdxSts extends Sts {
 		double tp = 0.0;
 		
 		String datatype = null;
-		Connection connection = DBConnect.connect();
+		Connection connection = DBConnect.getConnection();
 		Statement stat = connection.createStatement();
 		String sql = "select * from wpidxcache where wpindexid = \"" + id + "\";";
 

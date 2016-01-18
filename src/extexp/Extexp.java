@@ -10,7 +10,7 @@ import java.text.SimpleDateFormat;
 import org.wltea.expression.*;
 import org.wltea.expression.datameta.Variable;
 
-import db.DBConnect;
+import url_db.DBConnect;
 import basic.Definition;
 
 public class Extexp {
@@ -55,7 +55,7 @@ public class Extexp {
 //		}
 		
 		
-		Connection connection = DBConnect.connect();
+		Connection connection = DBConnect.getConnection();
 		Statement stat = connection.createStatement();
 		String sql = "select * from rawdata where id = \"" + id + "\" and environmentid = \"" + environmentid + "\" order by time;";
 
@@ -98,7 +98,6 @@ public class Extexp {
 			lastTime = time;
 		}
 		ret.add(group);
-		connection.close();
 		return ret;
 	}
 	
@@ -401,8 +400,6 @@ public class Extexp {
 		String expression = null;
 		List<Variable> variables = new ArrayList<Variable>();
 		variables.add(Variable. createVariable ("t", t));
-		
-		DBConnect.setDbInfo();
 		
 		expression = "$SELECT(\"00000015\", \"00000000\", $TODATE(\"2016-01-06 10:00:00.00\"), $TODATE(\"2016-01-06 10:03:00.00\"))";
 		List<List<List<Comparable>>> rawdata = (List<List<List<Comparable>>>)ExpressionEvaluator. evaluate (expression, variables);
