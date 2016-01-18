@@ -1,0 +1,10 @@
+mysql,jdbc:mysql://localhost/evaluation_config,root,123456
+**************************该配置文件仅第一行有效*********************
+格式说明：
+1.值与值之间用逗号分隔，第一个值为数据库类型，包括mysql、sqlite、oracle、sqlserver
+2.如果数据库型类为MySQL，则书写格式如下:
+	mysql:用户名:密码:数据库表名
+	示例:mysql,databaseURL,user,passwd
+3.如果数据库型类为Sqlite，则书写格式如下:
+
+	示例:
