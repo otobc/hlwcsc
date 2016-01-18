@@ -1,9 +1,0 @@
-{
-    "result":"00",
-    "message":"OK",
-    "data":
-    [					
-        {"key":"id1", "value":"name1"}, 
-        {"key":"id2", "value":"name2"}
-    ]
-}
