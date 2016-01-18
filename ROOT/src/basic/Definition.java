@@ -28,7 +28,7 @@ public class Definition {
 	// 数据类型
 	public class Datatype {
 		public static final String STRING = "0";
-		public static final String INTEGER = "1";
+		public static final String LONG = "1";
 		public static final String DOUBLE = "2";
 		public static final String BOOLEAN = "3";
 	}
