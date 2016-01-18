@@ -1,27 +1,27 @@
 var easyconf = new Object({
     // basic definition here, pls do not modify them 
     selectHints: {
-        0:"EQUALS",
-        1:"CONTAINS",
-        2:"LESS THAN",
-        3:"MORE THAN",
-        4:"LESS THAN OR EQUALS",
-        5:"MORE THAN OR EQUALS"
+        0:"等于：",
+        1:"包含：",
+        2:"小于：",
+        3:"大于：",
+        4:"小于等于：",
+        5:"大于等于："
     },
 
     names:{
-        SEARCH:"SEARCH",
-        INSERT:"INSERT",
-        DETAIL:"DETAIL",
-        UPDATE:"UPDATE",
-        DELETE:"DELETE",
-        FRESH:"FRESH",
-        PREV:"PREV",
-        NEXT:"NEXT",
-        GO:"GO",
-        RETURN:"RETURN",
-        COMMIT:"COMMIT",
-        OPERATIONS:"OPERATIONS"
+        SEARCH:"查找",
+        INSERT:"新增",
+        DETAIL:"详情",
+        UPDATE:"更新",
+        DELETE:"删除",
+        FRESH:"删除",
+        PREV:"上页",
+        NEXT:"下页",
+        GO:"跳转",
+        RETURN:"返回",
+        COMMIT:"提交",
+        OPERATIONS:"操作"
     },
     types:{
         STRING:0,
@@ -30,15 +30,15 @@ var easyconf = new Object({
         BOOLEAN:3,
         DATE:4
     },
-    subTitles:['LIST', 'DETAIL', 'UPDATE', 'INSERT'],
+    subTitles:['查找', '详情', '更新', '新增'],
     msgs:{
-        OK:"OK",
-        NOTNULL:"NOT NULL",
-        INTEGER:"MUST INPUT INTEGER",
-        DOUBLE:"MUST INPUT NUMBER",
-        TYPEERROR:"TYPE ERROR",
-        DATE:"MUST INPUT DATE:[YYYY-MM-DD hh:mm:ss.ms]",
-        NOTUNIQUE:"NOT UNIQUE",
+        OK:"通过",
+        NOTNULL:"不允许为空",
+        INTEGER:"必须为整数",
+        DOUBLE:"必须为数字",
+        TYPEERROR:"类型错误",
+        DATE:"必须为日期:[YYYY-MM-DD hh:mm:ss.ms]",
+        NOTUNIQUE:"数据已存在",
     },
     controls:{
         TEXT:0,
@@ -56,13 +56,13 @@ var easyconf = new Object({
         FLEXIBLE:1
     },
     apps:{
-        INIT:"init",
-        LIST:"list",
-        DETAIL:"detail",
-        DELETE:"delete",
-        UPDATE:"update",
-        INSERT:"insert",
-        RANGE:"range"
+        INIT:"servlet/Init",
+        LIST:"servlet/List",
+        DETAIL:"servlet/Detail",
+        DELETE:"servlet/Delete",
+        UPDATE:"servlet/Update",
+        INSERT:"servlet/Insert",
+        RANGE:"servlet/Range"
     },
     dateRE:RegExp("^\\d{4}-(0?[1-9]|1[0-2])-(0?[1-9]|[1-2]\\d|3[0-1]) ([0-1]\\d|2[0-3]):[0-5]\\d:[0-5]\\d\\.\\d{2}$"),
     _keyStr : "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=",
@@ -89,9 +89,9 @@ var easyconf = new Object({
         ec.lastquery = null;
         ec.view = ec.views.LIST;
 
-//        http.get(ec.apps.INIT, {params:{table:ec.table}}).success(
-        url = "./init.json";
-        http.get(url).success(
+        http.get(ec.apps.INIT, {params:{table:ec.table}}).success(
+//        url = "./init.json";
+//        http.get(url).success(
             function(response) {
                 ec.conf = response;
                 ec.setCandidateAndRange();
@@ -105,9 +105,9 @@ var easyconf = new Object({
         data = ec.getShowCol();
         
         ec.lock();
-//        http.get(ec.apps.LIST, {params:{table:ec.table, data:ec.list2str(data), query:ec.dict2str(query), begin:0, count:ec.conf.count}}).success(
-        url = "./list.json";
-        http.get(url).success(
+        http.get(ec.apps.LIST, {params:{table:ec.table, data:ec.list2str(data), query:ec.dict2str(query), begin:0, count:ec.conf.count}}).success(
+//        url = "./list.json";
+//        http.get(url).success(
             function(response) {
                 ec.setListContent(response.data);
                 ec.lastquery = query;
@@ -127,9 +127,9 @@ var easyconf = new Object({
         query = ec.getPKV(row);
         
         ec.lock();
-//        http.get(ec.apps.DETAIL, {params:{table:ec.table, query:ec.dict2str(query), begin:0, count:1}}).success(
-        url = "./detail.json"
-        http.get(url).success(
+        http.get(ec.apps.DETAIL, {params:{table:ec.table, query:ec.dict2str(query), begin:0, count:1}}).success(
+//        url = "./detail.json"
+//        http.get(url).success(
             function(response) {
                 ec.setDetailContent(response.data);
                 ec.view = view; 
@@ -146,9 +146,9 @@ var easyconf = new Object({
         query = ec.getPKV(row);
         
         ec.lock();
-//        http.post(ec.apps.DELETE, {params:{table:ec.table, query:ec.dict2str(query)}}).success(
-        url = "./OK.json";
-        http.get(url).success(
+        http.post(ec.apps.DELETE, {params:{table:ec.table, query:ec.dict2str(query)}}).success(
+//        url = "./OK.json";
+//        http.get(url).success(
             function(response) {
                 ec.freshCall();
                 ec.unLock();
@@ -158,9 +158,9 @@ var easyconf = new Object({
 
     jump:function(http) {
         ec.lock();
-//        http.get(ec.apps.LIST, {params:{table:ec.table, data:ec.list2str(data), query:ec.dict2str(ec.lastquery), begin:ec.cursor, count:ec.conf.count}}).success(
-        url = "./list.json";
-        http.get(url).success(
+        http.get(ec.apps.LIST, {params:{table:ec.table, data:ec.list2str(data), query:ec.dict2str(ec.lastquery), begin:ec.cursor, count:ec.conf.count}}).success(
+//        url = "./list.json";
+//        http.get(url).success(
             function(response) {
                 ec.setListContent(response.data);
                 ec.unLock();
@@ -224,9 +224,9 @@ var easyconf = new Object({
     focus:function(http, column) {
         if (ec.isColFlexible(column)) {
             ec.lock();
-//            http.get(ec.apps.RANGE, {params:{table:column.flexible.table, key:column.flexible.key, value:column.flexible.value, query:ec.dict2str(ec.getRGV(column))}}).success(
-            url = "./range.json"
-            http.get(url).success(
+            http.get(ec.apps.RANGE, {params:{table:column.flexible.table, key:column.flexible.key, value:column.flexible.value, query:ec.dict2str(ec.getRGV(column))}}).success(
+//            url = "./range.json"
+//            http.get(url).success(
                 function(response) {
                     ec.range[column.id] = response.data;
                     ec.unLock();
@@ -253,9 +253,9 @@ var easyconf = new Object({
         }
         
         ec.lock();
-//        http.post(domain, config).success(
+        http.post(domain, config).success(
 //        url = "./OK.json"
-        url = "./NU.json"
+//        url = "./NU.json"
         http.get(url).success(
             function(response) {
                 if (response.result == "00") {
