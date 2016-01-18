@@ -146,7 +146,7 @@ var easyconf = new Object({
         query = ec.getPKV(row);
         
         ec.lock();
-        http.post(ec.apps.DELETE, {params:{table:ec.table, query:ec.dict2str(query)}}).success(
+        http.post(ec.apps.DELETE, {table:ec.table, query:ec.dict2str(query)}).success(
 //        url = "./OK.json";
 //        http.get(url).success(
             function(response) {
@@ -245,11 +245,11 @@ var easyconf = new Object({
 
         if (ec.isUpdateView()) {
             domain = ec.apps.UPDATE;
-            config = {params:{table:ec.table, data:ec.dict2str(ec.detailContent), query:ec.dict2str(query)}};
+            config = {table:ec.table, data:ec.dict2str(ec.detailContent), query:ec.dict2str(query)};
         }
         else if (ec.isInsertView()) {
             domain = ec.apps.INSERT;
-            config = {params:{table:ec.table, data:ec.dict2str(ec.detailContent)}};
+            config = {table:ec.table, data:ec.dict2str(ec.detailContent)};
         }
         
         ec.lock();

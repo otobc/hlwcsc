@@ -1,6 +1,8 @@
 package servlet;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.sql.SQLException;
 
 import javax.servlet.ServletException;
@@ -8,7 +10,10 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.codehaus.jackson.map.ObjectMapper;
+
 import bean_json.BeanToJson;
+import bean_json.InsDtBean;
 import db.DBConnect;
 import db.ExecuteSQL;
 import url.URLtoSQL;
@@ -24,10 +29,22 @@ public class Insert extends HttpServlet
 	public void doPost(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException
 	{
+		
+		BufferedReader br = new BufferedReader(new InputStreamReader(request.getInputStream()));
+	    String line = null;
+	    StringBuilder sb = new StringBuilder();
+	    while((line = br.readLine())!=null){
+	       sb.append(line);
+	    }
+	    
+	    ObjectMapper mapper = new ObjectMapper();
+	    InsDtBean insdata = mapper.readValue(sb.toString(), InsDtBean.class);
+	    
 		// 1.获取前端请求参数
 		System.out.println("\n*********get insert request");
-		String table = request.getParameter("table");
-		String data = request.getParameter("data");
+		
+		String table = insdata.table;
+		String data = insdata.data;
 		System.out.println("table=" + table + "\ndata=" + data);
 
 		// 2.对参数处理拼接成SQL语句
