@@ -1,9 +1,5 @@
 package url;
 
-import java.sql.Connection;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
 import java.util.ArrayList;
 
 import bean_json.JsonToBean;
@@ -12,9 +8,6 @@ import bean_json.TableBean;
 public class URLtoSQL
 {
 	/*
-	 * connection.close();//待处理
-	 * 
-	 * 
 	 * 使用statement,首先读取配置文件拿到列属性信息,拼接时根据列属性判断每个值，处理char型加引号
 	 * 判断是否使用prepareStatement：此系统为了保持通用性（少依赖JDBC），并且SQL语句结构不固定，
 	 * 所以prepareStatement不适用
@@ -25,8 +18,6 @@ public class URLtoSQL
 		String rangesql = "select " + key + ", " + value + " from " + table;
 		String condition = getCondition(kvquery, table);
 		rangesql = rangesql + condition;// 组成的完整SQL语句
-		System.out.println("rangesql=" + rangesql);
-
 		return rangesql;
 	}
 
@@ -37,10 +28,8 @@ public class URLtoSQL
 		{
 			ArrayList<ArrayList<String>> queryTypeList = judgekTypeToSetv(
 					kvquery, table);// 处理使char值加双引号
-
 			ArrayList<String> klist = queryTypeList.get(0);
 			ArrayList<String> vlist = queryTypeList.get(1);
-
 			condition = " where " + klist.get(0) + "=" + vlist.get(0);
 			String temp = "";
 			for (int i = 1; i < klist.size(); i++)
@@ -69,8 +58,6 @@ public class URLtoSQL
 		values = values + vlist.get(i);
 
 		insertsql = insertsql + " values (" + values + ")";// 组成的完整SQL语句
-		System.out.println("insertsql=" + insertsql);
-
 		return insertsql;
 	}
 
@@ -78,7 +65,6 @@ public class URLtoSQL
 			String kvquery, String begin, String count)
 	{
 		String searchsql = null;
-
 		String cols = "";
 		ArrayList<ArrayList<String>> kvdataArrayList = Base64
 				.decodeBase64Sentence(kdata);
@@ -89,9 +75,7 @@ public class URLtoSQL
 			cols += kdataList.get(i) + ", ";
 		}
 		cols = cols + kdataList.get(i);
-
 		searchsql = "select " + cols + " from " + table;
-
 		String condition = "";
 		if (!kvquery.equals(""))
 		{
@@ -108,8 +92,6 @@ public class URLtoSQL
 			condition = condition + temp;
 		}
 		searchsql = searchsql + condition;// 组成的完整SQL语句
-		System.out.println("searchsql=" + searchsql);
-
 		return searchsql;
 	}
 

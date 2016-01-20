@@ -494,45 +494,9 @@
             },
             "dft":"01"
         },
- 		{
-            "id":"amnwt",
-            "name":"加权算数平均权值",
-            "isShow":true,
-            "isPrimaryKey":false,
-            "isNull":true,
-            "type":2,
-            "control":0,
-            "check":
-            [
-                {
-                    "funcname":"testfunc1",
-                    "argument":["col2", "col3"],
-                    "errmsg":"err1"
-                },
-                {
-                    "funcname":"testfunc2",
-                    "argument":["col3"],
-                    "errmsg":"err2"
-                }
-            ],		
-            "isSelect":true,
-            "selectType":1,
-            "candidate":null,
-            "fixed":
-            [
-            ],
-			"flexible":
-            {
-                "key":null,
-                "value":null,	
-                "table":null,
-                "where":[]
-            },
-            "dft":"col14"
-        },
        {
-            "id":"mnwting",
-            "name":"综合加权平均计算方法",
+            "id":"weigting",
+            "name":"加权计算方法",
             "isShow":true,
             "isPrimaryKey":false,
             "isNull":true,

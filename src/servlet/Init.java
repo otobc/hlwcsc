@@ -16,7 +16,7 @@ public class Init extends HttpServlet
 	{
 		System.out.println("\n**********get Init request");
 		String table = request.getParameter("table");
-		
+
 		BeanToJson beanToJson = new BeanToJson();
 		String initJson = beanToJson.getInitJson(table);
 		System.out.println(table + "\n" + initJson);

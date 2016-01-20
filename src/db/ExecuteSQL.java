@@ -7,7 +7,7 @@ import java.sql.Statement;
 
 public class ExecuteSQL
 {
-	Connection	connection	= DBConnect.getConnection();
+	private Connection	connection	= DBConnect.getConnection();
 
 	public ResultSet getSelectResult(String rangesql)
 	{

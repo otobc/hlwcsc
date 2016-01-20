@@ -16,12 +16,20 @@ public class DBConnect
 	{
 		return connection;
 	}
-	
-	public static void closeConnection() throws SQLException {
-		connection.close();
+
+	public static void closeConnection()
+	{
+		try
+		{
+			connection.close();
+		} catch (SQLException e)
+		{
+			e.printStackTrace();
+		}
 	}
 
-	private Connection connect() {
+	private Connection connect()
+	{
 		Connection connection = null;
 
 		String path = null;
@@ -48,15 +56,16 @@ public class DBConnect
 		System.out.println("\n" + dbinfo);
 
 		String[] info = dbinfo.split(",");
-		
-		try {
+
+		try
+		{
 			Class.forName(info[0]);
-			connection = DriverManager.getConnection(info[1]
-					, info[2], info[3]);
-		} 
-		catch (ClassNotFoundException | SQLException e) {
+			connection = DriverManager.getConnection(info[1], info[2], info[3]);
+		} catch (ClassNotFoundException | SQLException e)
+		{
 			e.printStackTrace();
 		}
+		System.out.println("connect successfully");
 		return connection;
 	}
 

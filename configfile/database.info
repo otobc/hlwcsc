@@ -1,4 +1,6 @@
-org.sqlite,jdbc:sqlite:E:\workspace\tmp\evaluation_config.db,user,password
+com.mysql.jdbc.Driver,jdbc:mysql://localhost/evaluation_config,root,123456
 **************************该配置文件仅第一行有效*********************
 格式说明：
 1.值与值之间用逗号分隔，第一个值为数据库驱动库包名称，第二个值为jdbc url，第三个值为用户名，第四个值为密码（待加密）
+示例：
+org.sqlite,jdbc:sqlite:E:\workspace\tmp\evaluation_config.db,user,password

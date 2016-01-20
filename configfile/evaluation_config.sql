@@ -29,8 +29,7 @@ create table vertex (
     nmlvlexp	varchar(1024),
     mbsp	varchar(1024),
     conclude	char(2),
-    amnwt	double(9,8),
-    mnwting char(2),
+    weighing char(2),
     primary key (evaluateid,id)
 );
 
@@ -39,7 +38,6 @@ create table edge (
     child	varchar(64)		not null,
     parent	varchar(64)		not null,
     weight	double(9,8)	not null,
-    weighting	char(2),
     primary key (evaluateid,child,parent)
 );
 

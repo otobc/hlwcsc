@@ -39,7 +39,7 @@
                 "table":"evaluate",
                 "where":[]
             },
-            "dft":"001"
+            "dft":"col1"
         },
         {
             "id":"child",
@@ -63,7 +63,7 @@
                 }
             ],		
             "isSelect":true,
-            "selectType":1,
+            "selectType":0,
             "candidate":1,
             "fixed":
             [
@@ -71,11 +71,11 @@
 			"flexible":
             {
                 "key":"id",
-                "value":"name",	
+                "value":"name",	 
                 "table":"vertex",
                 "where":["evaluateid"]
             },
-            "dft":"001"
+            "dft":"col2"
         },
         {
             "id":"parent",
@@ -99,19 +99,19 @@
                 }
             ],		
             "isSelect":true,
-            "selectType":2,
+            "selectType":0,
             "candidate":1,
             "fixed":
             [
             ],
 			"flexible":
             {
-                "key":"id",
-                "value":"name",	
+               "key":"id",
+                "value":"name",	 
                 "table":"vertex",
                 "where":["evaluateid"]
             },
-            "dft":"001"
+            "dft":"col3"
         },
         {
             "id":"weight",
@@ -135,57 +135,21 @@
                 }
             ],		
             "isSelect":true,
-            "selectType":3,
+            "selectType":0,
             "candidate":null,
             "fixed":
             [
             ],
 			"flexible":
             {
-                "key":null,
-                "value":null,	
+               "key":null,
+                "value":null,	 
                 "table":null,
                 "where":[]
             },
-            "dft":"0.5"
-        },
-        {
-            "id":"weighting",
-            "name":"加权计算方法",
-            "isShow":true,
-            "isPrimaryKey":false,
-            "isNull":true,
-            "type":0,
-            "control":1,
-            "check":
-            [
-                {
-                    "funcname":"testfunc1",
-                    "argument":["col2", "col3"],
-                    "errmsg":"err1"
-                },
-                {
-                    "funcname":"testfunc2",
-                    "argument":["col3"],
-                    "errmsg":"err2"
-                }
-            ],		
-            "isSelect":true,
-            "selectType":4,
-            "candidate":0,
-            "fixed":
-            [
-                {"key":"01", "value":"算数加权"},
-                {"key":"02", "value":"几何加权"}  
-            ],
-			"flexible":
-            {
-                "key":null,
-                "value":null,	
-                "table":null,
-                "where":null
-            },
-            "dft":"01"
+            "dft":"col4"
         }
 	]
+	
+	
 }

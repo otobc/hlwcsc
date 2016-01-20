@@ -2,17 +2,15 @@ package servlet;
 
 import java.io.IOException;
 import java.sql.ResultSet;
-import java.sql.SQLException;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import bean_json.BeanToJson;
-import db.DBConnect;
-import db.ExecuteSQL;
 import url.URLtoSQL;
+import bean_json.BeanToJson;
+import db.ExecuteSQL;
 
 public class Search extends HttpServlet
 {
@@ -34,6 +32,7 @@ public class Search extends HttpServlet
 		URLtoSQL urltoSQL = new URLtoSQL();
 		String searchsql = urltoSQL.getSearchSQLFromURL(table, data, query,
 				begin, count);
+		System.out.println("searchsql=" + searchsql);
 
 		// 3.连接数据库执行得到结果
 		ExecuteSQL executeSQL = new ExecuteSQL();
@@ -45,15 +44,8 @@ public class Search extends HttpServlet
 		System.out.println("searchJson=" + searchJson);
 
 		// 5.发送json给前端
-		try {
-			DBConnect.closeConnection();
-		} catch (SQLException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
 		response.getOutputStream().write(searchJson.getBytes("utf-8"));
 		System.out.println("response successfully");
-
 	}
 
 	public void doPost(HttpServletRequest request, HttpServletResponse response)

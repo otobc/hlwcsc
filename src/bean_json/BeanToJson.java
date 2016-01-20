@@ -51,7 +51,7 @@ public class BeanToJson
 	public String getRangeJson(ResultSet resultSet) throws IOException,
 			JsonGenerationException, JsonMappingException
 	{
-		String rangeJson="";
+		String rangeJson = "";
 		// 对数据库执行结果处理，为bean赋值,转化为json串
 		ArrayList<KVBean> kvBeanList = new ArrayList<KVBean>();
 		try
@@ -96,14 +96,14 @@ public class BeanToJson
 
 	public String getSearchJson(ResultSet resultSet, String begin, String count)
 	{
-		String searchJson="";
+		String searchJson = "";
 		try
 		{
-			while(resultSet.next())
+			while (resultSet.next())
 			{
-				//x,y,post/get
-				//处理执行结果赋值给bean，bean to json
-				//重构URLtoSQLtoResult类，sql产生和执行分开
+				// x,y,post/get
+				// 处理执行结果赋值给bean，bean to json
+				// 重构URLtoSQLtoResult类，sql产生和执行分开
 			}
 		} catch (SQLException e)
 		{
