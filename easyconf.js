@@ -261,7 +261,7 @@ var easyconf = new Object({
             function(response) {
                 if (response.result == "00") {
                     if (ec.isInsertView()) {
-                        ec.setDetailContent();
+                        ec.setDetailContent([[]]);
                         ec.keyContent = {};
                     }
                 }
