@@ -15,7 +15,7 @@ var easyconf = new Object({
         DETAIL:"详情",
         UPDATE:"更新",
         DELETE:"删除",
-        FRESH:"删除",
+        FRESH:"刷新",
         PREV:"上页",
         NEXT:"下页",
         GO:"跳转",
@@ -402,6 +402,7 @@ var easyconf = new Object({
             column = columns[i];
             content = data[i];
             if (column.control == ec.controls.CBOX && column.candidate == ec.candidates.FLEXIBLE) {
+                console.log(content);
                 idx = content.indexOf("|");
                 keyContent = ec.decode(content.substr(0, idx));
                 valueContent = ec.decode(content.substr(idx+1));
@@ -431,7 +432,7 @@ var easyconf = new Object({
     },
 
     setDetailContent:function(data) {
-        ec.detailContent = ec.getContent(data, false);
+        ec.detailContent = ec.getContent(data[0], false);
     },
 
     setPrimaryKeyContent:function() {
