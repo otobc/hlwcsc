@@ -404,23 +404,25 @@ var easyconf = new Object({
         for (var i=0; i<columns.length; i++) {
             column = columns[i];
             content = data[i];
-            if (column.control == ec.controls.CBOX && column.candidate == ec.candidates.FLEXIBLE) {
-                idx = content.indexOf("|");
-                keyContent = ec.decode(content.substr(0, idx));
-                valueContent = ec.decode(content.substr(idx+1));
-                ret[column.id] =  keyContent;
-                if (isList) {
-                    if (ec.candidate[column.id] == null) {
-                        ec.candidate[column.id] = {};
+            if (column.isShow || !isList) {
+                if (column.control == ec.controls.CBOX && column.candidate == ec.candidates.FLEXIBLE) {
+                    idx = content.indexOf("|");
+                    keyContent = ec.decode(content.substr(0, idx));
+                    valueContent = ec.decode(content.substr(idx+1));
+                    ret[column.id] =  keyContent;
+                    if (isList) {
+                        if (ec.candidate[column.id] == null) {
+                            ec.candidate[column.id] = {};
+                        }
+                        ec.candidate[column.id][keyContent] = valueContent;
                     }
-                    ec.candidate[column.id][keyContent] = valueContent;
+                    else {
+                        ec.range[column.id] = [{"key":keyContent, "value":valueContent}];
+                    }
                 }
                 else {
-                    ec.range[column.id] = [{"key":keyContent, "value":valueContent}];
+                    ret[column.id] = content;
                 }
-            }
-            else {
-                ret[column.id] = content;
             }
         }
         return ret;
