@@ -83,9 +83,12 @@ public class URLtoSQL
 					kvquery, table); // 处理使char值加引号
 			ArrayList<String> klist = queryselectTypeList.get(0);
 			ArrayList<String> vlist = queryselectTypeList.get(1);
-			condition = " where " + klist.get(0) + vlist.get(0);
+			if(vlist.size()>0)
+			{
+				condition = " where " + klist.get(0) + vlist.get(0);
+			}
 			String temp = "";
-			for (int j = 1; j < klist.size(); j++)
+			for (int j = 1; j < vlist.size(); j++)
 			{
 				temp += " and " + klist.get(j) + vlist.get(j);
 			}
@@ -134,7 +137,7 @@ public class URLtoSQL
 		ArrayList<String> vlist = queryDecodedList.get(1);
 		JsonToBean jsonToBean = new JsonToBean();
 		TableBean tableBean = jsonToBean.getTableBean(table);
-		for (int i = 0; i < klist.size(); i++)
+		for (int i = 0; i < vlist.size(); i++)
 		{
 			for (int j = 0; j < tableBean.columns.size(); j++)
 			{
