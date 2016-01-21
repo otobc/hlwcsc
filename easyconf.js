@@ -124,10 +124,11 @@ var easyconf = new Object({
     },
 
     detail:function(http, row, view) {
+        data = ec.getAllCol();
         query = ec.getPKV(row);
         
         ec.lock();
-        http.get(ec.apps.DETAIL, {params:{table:ec.table, query:ec.dict2str(query), begin:0, count:1}}).success(
+        http.get(ec.apps.DETAIL, {params:{table:ec.table, data:ec.list2str(data), query:ec.dict2str(query), begin:0, count:1}}).success(
 //        url = "./detail.json"
 //        http.get(url).success(
             function(response) {
