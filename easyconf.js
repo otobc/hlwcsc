@@ -58,7 +58,6 @@ var easyconf = new Object({
     apps:{
         INIT:"servlet/Init",
         LIST:"servlet/Search",
-        DETAIL:"servlet/Search",
         DELETE:"servlet/Delete",
         UPDATE:"servlet/Update",
         INSERT:"servlet/Insert",
@@ -102,7 +101,7 @@ var easyconf = new Object({
 
     search:function(http, query) {
         console.log("search...");
-        data = ec.getShowCol();
+        data = ec.getAllCol();
         
         ec.lock();
         http.get(ec.apps.LIST, {params:{table:ec.table, data:ec.list2str(data), query:ec.dict2str(query), begin:0, count:ec.conf.count}}).success(
@@ -124,11 +123,12 @@ var easyconf = new Object({
     },
 
     detail:function(http, row, view) {
+        console.log("detail...");
         data = ec.getAllCol();
         query = ec.getPKV(row);
         
         ec.lock();
-        http.get(ec.apps.DETAIL, {params:{table:ec.table, data:ec.list2str(data), query:ec.dict2str(query), begin:0, count:1}}).success(
+        http.get(ec.apps.LIST, {params:{table:ec.table, data:ec.list2str(data), query:ec.dict2str(query), begin:0, count:1}}).success(
 //        url = "./detail.json"
 //        http.get(url).success(
             function(response) {
@@ -324,10 +324,6 @@ var easyconf = new Object({
         return ret;
     },
 
-    getShowCol:function() {
-        return ec.getCol(true);
-    },
-
     getAllCol:function() {
         return ec.getCol(false);
     },
@@ -405,25 +401,23 @@ var easyconf = new Object({
         for (var i=0; i<columns.length; i++) {
             column = columns[i];
             content = data[i];
-            if (column.isShow || !isList) {
-                if (column.control == ec.controls.CBOX && column.candidate == ec.candidates.FLEXIBLE) {
-                    idx = content.indexOf("|");
-                    keyContent = ec.decode(content.substr(0, idx));
-                    valueContent = ec.decode(content.substr(idx+1));
-                    ret[column.id] =  keyContent;
-                    if (isList) {
-                        if (ec.candidate[column.id] == null) {
-                            ec.candidate[column.id] = {};
-                        }
-                        ec.candidate[column.id][keyContent] = valueContent;
+            if (column.control == ec.controls.CBOX && column.candidate == ec.candidates.FLEXIBLE) {
+                idx = content.indexOf("|");
+                keyContent = ec.decode(content.substr(0, idx));
+                valueContent = ec.decode(content.substr(idx+1));
+                ret[column.id] =  keyContent;
+                if (isList) {
+                    if (ec.candidate[column.id] == null) {
+                        ec.candidate[column.id] = {};
                     }
-                    else {
-                        ec.range[column.id] = [{"key":keyContent, "value":valueContent}];
-                    }
+                    ec.candidate[column.id][keyContent] = valueContent;
                 }
                 else {
-                    ret[column.id] = content;
+                    ec.range[column.id] = [{"key":keyContent, "value":valueContent}];
                 }
+            }
+            else {
+                ret[column.id] = content;
             }
         }
         return ret;
