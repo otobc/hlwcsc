@@ -80,7 +80,7 @@
         {
             "id":"parent",
             "name":"父节点编码",
-            "isShow":true,
+            "isShow":false,
             "isPrimaryKey":true,
             "isNull":false,
             "type":0,
@@ -116,7 +116,7 @@
         {
             "id":"weight",
             "name":"边权重",
-            "isShow":true,
+            "isShow":false,
             "isPrimaryKey":false,
             "isNull":false,
             "type":2,

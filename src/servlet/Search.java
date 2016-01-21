@@ -40,7 +40,7 @@ public class Search extends HttpServlet
 
 		// 4.对SQL执行结果进行处理映射为json响应串
 		BeanToJson resultJson = new BeanToJson();
-		String searchJson = resultJson.getSearchJson(resultSet, begin, count);
+		String searchJson = resultJson.getSearchJson(resultSet,table, data, begin, count);
 		System.out.println("searchJson=" + searchJson);
 
 		// 5.发送json给前端

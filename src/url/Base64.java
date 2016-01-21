@@ -5,6 +5,7 @@ import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 
 import sun.misc.BASE64Decoder;
+import sun.misc.BASE64Encoder;
 
 public class Base64
 {
@@ -25,7 +26,8 @@ public class Base64
 				String[] temp = kv[i].split(":");
 				// 将列属性名和起对应的选择值保存到colAndVal这个列表里
 				colAndVal.get(0).add(decodeBase64String(temp[0]));
-				if (temp.length > 1)// 处理{k:v,k:v},{k,k,k}情况不执行
+				if (temp.length > 1)// 处理{k:v,k:v},{k,k,k}情况不执行,avoid temp
+									// outofbound
 				{
 					colAndVal.get(1).add(decodeBase64String(temp[1]));
 				}
@@ -56,6 +58,23 @@ public class Base64
 		}
 
 		return result;
+	}
+
+	public static String encodeBase64String(String str)
+	{
+		String base64String = "";
+		byte[] b = null;
+		try
+		{
+			b = str.getBytes("utf-8");
+		} catch (UnsupportedEncodingException e)
+		{
+			e.printStackTrace();
+		}
+		BASE64Encoder encoder = new BASE64Encoder();
+		base64String = encoder.encode(b);
+		return base64String;
+
 	}
 
 }

@@ -4,6 +4,7 @@ public class ColumnBean
 {
 	public String	id;			// 数据库中列名（英文）
 	public String	name;			// 中文说明
+	public boolean	isShow;
 	public boolean	isPrimaryKey;	// 此列是否为主键
 	public int		type;			// 列的数据类型0-string,1-long,2-double,3-boolean,4-Date
 	public boolean	isSelect;		// 是否作为可被查询的列

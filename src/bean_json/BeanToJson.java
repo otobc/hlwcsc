@@ -13,6 +13,8 @@ import org.codehaus.jackson.JsonGenerationException;
 import org.codehaus.jackson.map.JsonMappingException;
 import org.codehaus.jackson.map.ObjectMapper;
 
+import url.Base64;
+
 public class BeanToJson
 {
 	public String getInitJson(String table)
@@ -52,7 +54,6 @@ public class BeanToJson
 			JsonGenerationException, JsonMappingException
 	{
 		String rangeJson = "";
-		// 对数据库执行结果处理，为bean赋值,转化为json串
 		ArrayList<KVBean> kvBeanList = new ArrayList<KVBean>();
 		try
 		{
@@ -94,18 +95,61 @@ public class BeanToJson
 		return insertJson;
 	}
 
-	public String getSearchJson(ResultSet resultSet, String begin, String count)
+	public String getSearchJson(ResultSet resultSet, String table,
+			String kdata, String begin, String count)
 	{
 		String searchJson = "";
+
+		ArrayList<ArrayList<String>> kvdataArrayList = Base64
+				.decodeBase64Sentence(kdata);
+		ArrayList<String> klist = kvdataArrayList.get(0);
+		ArrayList<ArrayList<String>> Listklist = new ArrayList<ArrayList<String>>();
+		JsonToBean jsonToBean = new JsonToBean();
+		TableBean tableBean = jsonToBean.getTableBean(table);
 		try
 		{
 			while (resultSet.next())
 			{
-				// x,y,post/get
-				// 处理执行结果赋值给bean，bean to json
-				// 重构URLtoSQLtoResult类，sql产生和执行分开
+				ArrayList<String> vlist = new ArrayList<String>();// a new one
+																	// in memry
+
+				for (int i = 0; i < klist.size(); i++)
+				{
+					String value = resultSet.getString(klist.get(i));
+
+					for (int j = 0; j < tableBean.columns.size(); j++)
+					{
+						if (tableBean.columns.get(j).id.equals(klist.get(i))
+								&& tableBean.columns.get(j).candidate == 1)
+						{
+							String name = tableBean.columns.get(j).name;
+							value = Base64.encodeBase64String(value) + "|"
+									+ Base64.encodeBase64String(name);
+							break;
+						}
+					}
+					System.out.println("#value=" + value);
+					vlist.add(value);
+				}
+				Listklist.add(vlist);
 			}
 		} catch (SQLException e)
+		{
+			e.printStackTrace();
+		}
+
+		ObjectMapper map = new ObjectMapper();
+		SearchBean searchBean = new SearchBean();
+		searchBean.result = "00";
+		searchBean.message = "OK";
+		searchBean.data = Listklist;
+		try
+		{
+			searchJson = "{\"result\":\"00\",\"message\":\"OK\",\"data\":"
+					+ map.writeValueAsString(Listklist) + "}";
+			// searchJson=map.writeValueAsString(searchBean);
+			//two list embeded can not work
+		} catch (IOException e)
 		{
 			e.printStackTrace();
 		}
