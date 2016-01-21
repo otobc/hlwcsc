@@ -57,7 +57,7 @@ var easyconf = new Object({
     },
     apps:{
         INIT:"servlet/Init",
-        LIST:"servlet/List",
+        LIST:"servlet/Search",
         DETAIL:"servlet/Detail",
         DELETE:"servlet/Delete",
         UPDATE:"servlet/Update",
