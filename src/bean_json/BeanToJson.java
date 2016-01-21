@@ -125,6 +125,7 @@ public class BeanToJson
 							String name = tableBean.columns.get(j).name;
 							value = Base64.encodeBase64String(value) + "|"
 									+ Base64.encodeBase64String(name);
+							System.out.println("*|name="+name);
 							break;
 						}
 					}
