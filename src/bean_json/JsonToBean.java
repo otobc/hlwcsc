@@ -7,7 +7,7 @@ import org.codehaus.jackson.map.ObjectMapper;
 
 public class JsonToBean
 {
-	public TableBean getTableBean(String table)
+	public static TableBean getTableBean(String table)
 	{
 		TableBean tableBean = new TableBean();
 		ObjectMapper map = new ObjectMapper();

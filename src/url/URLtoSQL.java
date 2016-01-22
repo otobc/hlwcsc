@@ -49,7 +49,7 @@ public class URLtoSQL
 		String values = "";
 		ArrayList<ArrayList<String>> dataTypeList = judgekTypeToSetv(kvdata,
 				table);// 处理使char值加双引号
-		ArrayList<String> vlist = dataTypeList.get(1);
+		ArrayList<String> vlist = dataTypeList.get(1);//klist not used
 		int i;
 		for (i = 0; i < vlist.size() - 1; i++)
 		{
@@ -62,7 +62,7 @@ public class URLtoSQL
 	}
 
 	public String getSearchSQLFromURL(String table, String kdata,
-			String kvquery, String begin, String count)
+			String kvquery)
 	{
 		String searchsql = null;
 		String cols = "";
@@ -137,8 +137,7 @@ public class URLtoSQL
 				.decodeBase64Sentence(kvquery);
 		ArrayList<String> klist = queryDecodedList.get(0);
 		ArrayList<String> vlist = queryDecodedList.get(1);
-		JsonToBean jsonToBean = new JsonToBean();
-		TableBean tableBean = jsonToBean.getTableBean(table);
+		TableBean tableBean = JsonToBean.getTableBean(table);
 		for (int i = 0; i < vlist.size(); i++)// change vlist.size->klist.size
 												// to look query para except
 		{

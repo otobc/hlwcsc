@@ -9,13 +9,15 @@ public class ExecuteSQL
 {
 	private Connection	connection	= DBConnect.getConnection();
 
-	public ResultSet getSelectResult(String rangesql)
+	public ResultSet getExecuteQueryResult(String executeQuerySQL,
+			String begin, String count)
 	{
 		ResultSet resultSet = null;
 		try
 		{
 			Statement statement = connection.createStatement();
-			resultSet = statement.executeQuery(rangesql);
+			resultSet = statement.executeQuery(executeQuerySQL);
+			//x,y
 		} catch (SQLException e)
 		{
 			e.printStackTrace();
@@ -23,41 +25,27 @@ public class ExecuteSQL
 		return resultSet;
 	}
 
-	public int getInsertResult(String insertsql)
+	public ResultSet getExecuteQueryResult(String executeQuerySQL)
 	{
-		int result = 0;
+		ResultSet resultSet = null;
 		try
 		{
 			Statement statement = connection.createStatement();
-			result = statement.executeUpdate(insertsql);
+			resultSet = statement.executeQuery(executeQuerySQL);
 		} catch (SQLException e)
 		{
 			e.printStackTrace();
 		}
-		return result;
+		return resultSet;
 	}
 
-	public int getDeleteResult(String deletesql)
+	public int getExecuteUpdateResult(String executeUpdateSQL)
 	{
 		int result = 0;
 		try
 		{
 			Statement statement = connection.createStatement();
-			result = statement.executeUpdate(deletesql);
-		} catch (SQLException e)
-		{
-			e.printStackTrace();
-		}
-		return result;
-	}
-
-	public int getUpdateResult(String updatesql)
-	{
-		int result = 0;
-		try
-		{
-			Statement statement = connection.createStatement();
-			result = statement.executeUpdate(updatesql);
+			result = statement.executeUpdate(executeUpdateSQL);
 		} catch (SQLException e)
 		{
 			e.printStackTrace();

@@ -96,8 +96,7 @@ public class BeanToJson
 		return insertJson;
 	}
 
-	public String getSearchJson(ResultSet resultSet, String table,
-			String kdata, String begin, String count)
+	public String getSearchJson(ResultSet resultSet, String table, String kdata)
 	{
 		String searchJson = "";
 
@@ -105,8 +104,7 @@ public class BeanToJson
 				.decodeBase64Sentence(kdata);
 		ArrayList<String> klist = kvdataArrayList.get(0);
 		ArrayList<ArrayList<String>> Listklist = new ArrayList<ArrayList<String>>();
-		JsonToBean jsonToBean = new JsonToBean();
-		TableBean tableBean = jsonToBean.getTableBean(table);
+		TableBean tableBean = JsonToBean.getTableBean(table);
 		try
 		{
 			while (resultSet.next())
@@ -175,7 +173,7 @@ public class BeanToJson
 		System.out.println("*|Vsql=" + sql);
 
 		ExecuteSQL executeSQL = new ExecuteSQL();
-		ResultSet reSet = executeSQL.getSelectResult(sql);
+		ResultSet reSet = executeSQL.getExecuteQueryResult(sql);
 		String name = "";
 		while (reSet.next())
 		{

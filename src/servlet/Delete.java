@@ -51,7 +51,7 @@ public class Delete extends HttpServlet
 
 		// 3.连接数据库执行得到结果
 		ExecuteSQL executeSQL = new ExecuteSQL();
-		int result = executeSQL.getDeleteResult(deletesql);
+		int result = executeSQL.getExecuteUpdateResult(deletesql);
 
 		// 4.对SQL执行结果进行处理映射为json响应串
 		BeanToJson resultJson = new BeanToJson();

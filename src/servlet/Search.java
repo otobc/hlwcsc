@@ -30,17 +30,16 @@ public class Search extends HttpServlet
 
 		// 2.对参数处理拼接成SQL语句
 		URLtoSQL urltoSQL = new URLtoSQL();
-		String searchsql = urltoSQL.getSearchSQLFromURL(table, data, query,
-				begin, count);
+		String searchsql = urltoSQL.getSearchSQLFromURL(table, data, query);
 		System.out.println("searchsql=" + searchsql);
 
 		// 3.连接数据库执行得到结果
 		ExecuteSQL executeSQL = new ExecuteSQL();
-		ResultSet resultSet = executeSQL.getSelectResult(searchsql);
+		ResultSet resultSet = executeSQL.getExecuteQueryResult(searchsql,begin,count);
 
 		// 4.对SQL执行结果进行处理映射为json响应串
 		BeanToJson resultJson = new BeanToJson();
-		String searchJson = resultJson.getSearchJson(resultSet,table, data, begin, count);
+		String searchJson = resultJson.getSearchJson(resultSet,table, data);
 		System.out.println("searchJson=" + searchJson);
 
 		// 5.发送json给前端

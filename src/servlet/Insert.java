@@ -50,7 +50,7 @@ public class Insert extends HttpServlet
 
 		// 3.连接数据库执行得到结果
 		ExecuteSQL executeSQL = new ExecuteSQL();
-		int result = executeSQL.getInsertResult(insertsql);
+		int result = executeSQL.getExecuteUpdateResult(insertsql);
 
 		// 4.对SQL执行结果进行处理映射为json响应串
 		BeanToJson resultJson = new BeanToJson();
