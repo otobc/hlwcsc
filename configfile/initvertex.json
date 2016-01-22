@@ -495,7 +495,7 @@
             "dft":"01"
         },
        {
-            "id":"weigting",
+            "id":"weighting",
             "name":"加权计算方法",
             "isShow":true,
             "isPrimaryKey":false,

@@ -1,0 +1,44 @@
+{
+result:[00],				//响应结果，00为成功
+message:[OK],				//响应信息
+title: [title],				//此处定义了标题显示内容
+count:10,					//每页条数
+columns:
+	[					//此处定义了需要显示的表的各列信息
+		{ 
+		id:[col1],			//列在数据库中定义的名称
+		name:[列1],		//列在页面上显示的中文名
+		isShow:[true],		//查询时是否显示,主码必填true！
+		isPrimaryKey:[true],//是否为主键，在新增页面时，主键的列的控件触发onchange事件后，需要进行唯一性校验。
+		isNull:[true],		//是否为空，在新增或修改页面时，主键的列的控件触发onchange事件后，需要进行是否为空校验。
+		type:[0],			//列的数据类型，0- String /1-Long/2-Double/3-Boolean/4-Date			
+		control:[0],		//列在页面上显示的控件类型，0-text/1-combo box
+		check: 			//在新增或修改页面时，主键的列的控件触发onchange事件后所调用的自定义校验函数，见附录自定义校验函数。
+				[
+					{
+					funcname:[function1],
+					argument:[col1, col2…]
+					}			//调用函数时，第一个参数为本控件的值，之后的参数为argument中列对应的控件的值。
+					…
+				],	
+		isSelect:[true],		//是否作为查询条件。
+		selectType:[0],		//查询条件，0-精确/1-包含/2-小于/3-大于/4-小于等于/5-大于等于
+		candidate:[0/1],	//0-固定值，1-动态值，为固定值时从fixed中取候选内容，为动态值时从flexible中取key，value，table和query组sql语句从数据库中查询出候选内容。候选内容的格式为”key-value”。
+		fixed:
+		[
+		{key1:[value1]}, 
+		{key2:[value2]}
+		…
+		],
+		flexible:
+		{
+			key:[col],
+			value:[col],	 
+			table:[table],
+			where:[col1, col2…]//candidate为1时，此处若为空请填写[]
+		},
+		dft:[dft]		//默认值，查询层控件或新增页面对应控件的默认值。
+		},
+		…
+	]
+}

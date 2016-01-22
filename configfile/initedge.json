@@ -80,7 +80,7 @@
         {
             "id":"parent",
             "name":"¸¸½Úµã±àÂë",
-            "isShow":false,
+            "isShow":true,
             "isPrimaryKey":true,
             "isNull":false,
             "type":0,
