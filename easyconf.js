@@ -245,10 +245,12 @@ var easyconf = new Object({
         query = ec.getDetailPKV();
 
         if (ec.isUpdateView()) {
+            console.log("update...")
             domain = ec.apps.UPDATE;
             config = {table:ec.table, data:ec.dict2str(ec.detailContent), query:ec.dict2str(query)};
         }
         else if (ec.isInsertView()) {
+            console.log("insert...")
             domain = ec.apps.INSERT;
             config = {table:ec.table, data:ec.dict2str(ec.detailContent)};
         }
