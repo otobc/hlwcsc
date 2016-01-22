@@ -139,9 +139,9 @@
             "candidate":0,
             "fixed":
             [
-                {"key":0, "value":"效果量节点"},
-                {"key":1, "value":"准则节点"},
-                {"key":2, "value":"评估节点"}
+                {"key":"0", "value":"效果量节点"},
+                {"key":"1", "value":"准则节点"},
+                {"key":"2", "value":"评估节点"}
             ],
 			"flexible":
             {
@@ -178,8 +178,8 @@
             "candidate":0,
             "fixed":
             [ 	
-                {"key":0, "value":"定量节点"},
-                {"key":1, "value":"定性节点"}
+                {"key":"0", "value":"定量节点"},
+                {"key":"1", "value":"定性节点"}
             ],
 			"flexible":
             {
@@ -308,7 +308,7 @@
             "isPrimaryKey":false,
             "isNull":true,
             "type":0,
-            "control":1,
+            "control":0,
             "check":
             [
                 {
@@ -423,7 +423,7 @@
             "isPrimaryKey":false,
             "isNull":true,
             "type":0,
-            "control":1,
+            "control":0,
             "check":
             [
                 {
