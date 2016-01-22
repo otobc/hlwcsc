@@ -88,7 +88,7 @@ public class URLtoSQL
 				condition = " where " + klist.get(0) + vlist.get(0);
 			}
 			String temp = "";
-			for (int j = 1; j < vlist.size(); j++)
+			for (int j = 1; j < vlist.size(); j++)//change vlist.size->klist.size to look query para except
 			{
 				temp += " and " + klist.get(j) + vlist.get(j);
 			}
@@ -137,7 +137,7 @@ public class URLtoSQL
 		ArrayList<String> vlist = queryDecodedList.get(1);
 		JsonToBean jsonToBean = new JsonToBean();
 		TableBean tableBean = jsonToBean.getTableBean(table);
-		for (int i = 0; i < vlist.size(); i++)
+		for (int i = 0; i < vlist.size(); i++)//change vlist.size->klist.size to look query para except
 		{
 			for (int j = 0; j < tableBean.columns.size(); j++)
 			{

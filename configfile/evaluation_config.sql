@@ -29,7 +29,7 @@ create table vertex (
     nmlvlexp	varchar(1024),
     mbsp	varchar(1024),
     conclude	char(2),
-    weighing char(2),
+    weighting char(2),
     primary key (evaluateid,id)
 );
 

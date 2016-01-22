@@ -14,6 +14,7 @@ import org.codehaus.jackson.map.JsonMappingException;
 import org.codehaus.jackson.map.ObjectMapper;
 
 import url.Base64;
+import db.ExecuteSQL;
 
 public class BeanToJson
 {
@@ -112,20 +113,18 @@ public class BeanToJson
 			{
 				ArrayList<String> vlist = new ArrayList<String>();// a new one
 																	// in memry
-
 				for (int i = 0; i < klist.size(); i++)
 				{
 					String value = resultSet.getString(klist.get(i));
-
 					for (int j = 0; j < tableBean.columns.size(); j++)
 					{
 						if (tableBean.columns.get(j).id.equals(klist.get(i))
 								&& tableBean.columns.get(j).candidate == 1)
 						{
-							String name = tableBean.columns.get(j).name;
+							String name = getName(resultSet, tableBean, value,
+									j);
 							value = Base64.encodeBase64String(value) + "|"
 									+ Base64.encodeBase64String(name);
-							System.out.println("*|name="+name);
 							break;
 						}
 					}
@@ -149,11 +148,40 @@ public class BeanToJson
 			searchJson = "{\"result\":\"00\",\"message\":\"OK\",\"data\":"
 					+ map.writeValueAsString(Listklist) + "}";
 			// searchJson=map.writeValueAsString(searchBean);
-			//two list embeded can not work
+			// two list embeded can not work
 		} catch (IOException e)
 		{
 			e.printStackTrace();
 		}
 		return searchJson;
+	}
+
+	private String getName(ResultSet resultSet, TableBean tableBean,
+			String value, int j) throws SQLException
+	{
+		// when isPrimary=true,then must have isShow=true
+		String refvalue = tableBean.columns.get(j).flexible.value;
+		String reftable = tableBean.columns.get(j).flexible.table;
+		String refkey = tableBean.columns.get(j).flexible.key;
+		ArrayList<String> refwhere = tableBean.columns.get(j).flexible.where;
+		String sql = "select " + refvalue + " from " + reftable;
+		String condition = " where " + refkey + "='" + value + "'";
+		for (int k = 0; k < refwhere.size(); k++)
+		{
+			condition += " and " + refwhere.get(k) + "='"
+					+ resultSet.getString(refwhere.get(k)) + "'";
+		}
+		sql = sql + condition;
+		System.out.println("*|Vsql=" + sql);
+
+		ExecuteSQL executeSQL = new ExecuteSQL();
+		ResultSet reSet = executeSQL.getSelectResult(sql);
+		String name = "default";
+		while (reSet.next())
+		{
+			name = reSet.getString(refvalue);
+		}
+		System.out.println("*|name=" + name);
+		return name;
 	}
 }
