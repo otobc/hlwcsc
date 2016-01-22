@@ -101,7 +101,7 @@ var easyconf = new Object({
 
     search:function(http, query) {
         console.log("search...");
-        data = ec.getAllCol();
+        data = ec.getShowCol();
         
         ec.lock();
         http.get(ec.apps.LIST, {params:{table:ec.table, data:ec.list2str(data), query:ec.dict2str(query), begin:0, count:ec.conf.count}}).success(
@@ -317,11 +317,15 @@ var easyconf = new Object({
         columns = ec.conf.columns;
         for (var i=0; i<columns.length; i++) {
             column = columns[i];
-            if (!isOnlyShow || column.isShow) {
+            if (!isOnlyShow || column.isShow || column.isPrimaryKey) {
                 ret.push(column.id);
             }
         }
         return ret;
+    },
+
+    getShowCol:function() {
+        return ec.getCol(true);
     },
 
     getAllCol:function() {
@@ -401,24 +405,26 @@ var easyconf = new Object({
         for (var i=0; i<columns.length; i++) {
             column = columns[i];
             content = data[i];
-            if (column.control == ec.controls.CBOX && column.candidate == ec.candidates.FLEXIBLE) {
-                console.log(content);
-                idx = content.indexOf("|");
-                keyContent = ec.decode(content.substr(0, idx));
-                valueContent = ec.decode(content.substr(idx+1));
-                ret[column.id] =  keyContent;
-                if (isList) {
-                    if (ec.candidate[column.id] == null) {
-                        ec.candidate[column.id] = {};
+            if (!isList || column.isShow || column.isPrimaryKey) {
+                if (column.control == ec.controls.CBOX && column.candidate == ec.candidates.FLEXIBLE) {
+                    console.log(content);
+                    idx = content.indexOf("|");
+                    keyContent = ec.decode(content.substr(0, idx));
+                    valueContent = ec.decode(content.substr(idx+1));
+                    ret[column.id] =  keyContent;
+                    if (isList) {
+                        if (ec.candidate[column.id] == null) {
+                            ec.candidate[column.id] = {};
+                        }
+                        ec.candidate[column.id][keyContent] = valueContent;
                     }
-                    ec.candidate[column.id][keyContent] = valueContent;
+                    else {
+                        ec.range[column.id] = [{"key":keyContent, "value":valueContent}];
+                    }
                 }
                 else {
-                    ec.range[column.id] = [{"key":keyContent, "value":valueContent}];
+                    ret[column.id] = content;
                 }
-            }
-            else {
-                ret[column.id] = content;
             }
         }
         return ret;
