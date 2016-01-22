@@ -189,4 +189,25 @@ public class URLtoSQL
 		deletesql = deletesql + condition;
 		return deletesql;
 	}
+
+	public String getUpdateSQLFromURL(String table, String kvdata,
+			String kvquery)
+	{
+		String updatesql = null;
+		updatesql = "update " + table + " set ";
+
+		ArrayList<ArrayList<String>> dataTypeList = judgekTypeToSetv(kvdata,
+				table);// 处理使char值加双引号
+		ArrayList<String> klist = dataTypeList.get(0);
+		ArrayList<String> vlist = dataTypeList.get(1);
+		String setVal = klist.get(0) + "=" + vlist.get(0);
+		int i;
+		for (i = 1; i < vlist.size(); i++)
+		{
+			setVal =setVal+ ", " + klist.get(i) + "=" + vlist.get(i);
+		}
+		String condition = getCondition(kvquery, table);
+		updatesql = updatesql + setVal + condition;// 组成的完整SQL语句
+		return updatesql;
+	}
 }

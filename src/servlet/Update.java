@@ -13,11 +13,12 @@ import org.codehaus.jackson.map.ObjectMapper;
 
 import url.URLtoSQL;
 import bean_json.BeanToJson;
-import bean_json.InsDtBean;
+import bean_json.UptDtBean;
 import db.ExecuteSQL;
 
-public class Insert extends HttpServlet
+public class Update extends HttpServlet
 {
+
 	public void doGet(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException
 	{
@@ -28,7 +29,7 @@ public class Insert extends HttpServlet
 			throws ServletException, IOException
 	{
 		// 1.获取前端请求参数
-		System.out.println("\n*********get insert request");
+		System.out.println("\n*********get update request");
 		BufferedReader br = new BufferedReader(new InputStreamReader(
 				request.getInputStream()));
 		String line = null;
@@ -38,27 +39,29 @@ public class Insert extends HttpServlet
 			sb.append(line);
 		}
 		ObjectMapper mapper = new ObjectMapper();
-		InsDtBean insdata = mapper.readValue(sb.toString(), InsDtBean.class);
-		String table = insdata.table;
-		String data = insdata.data;
-		System.out.println("table=" + table + "\ndata=" + data);
+		UptDtBean uptdata = mapper.readValue(sb.toString(), UptDtBean.class);
+		String table = uptdata.table;
+		String data = uptdata.data;
+		String query = uptdata.query;
+		System.out.println("table=" + table + "\ndata=" + data + "\nquery"
+				+ query);
 
 		// 2.对参数处理拼接成SQL语句
 		URLtoSQL urltoSQL = new URLtoSQL();
-		String insertsql = urltoSQL.getInsertSQLFromURL(table, data);
-		System.out.println("insertsql=" + insertsql);
+		String updatesql = urltoSQL.getUpdateSQLFromURL(table, data, query);
+		System.out.println("updatesql=" + updatesql);
 
 		// 3.连接数据库执行得到结果
 		ExecuteSQL executeSQL = new ExecuteSQL();
-		int result = executeSQL.getInsertResult(insertsql);
+		int result = executeSQL.getUpdateResult(updatesql);
 
 		// 4.对SQL执行结果进行处理映射为json响应串
 		BeanToJson resultJson = new BeanToJson();
-		String insertJson = resultJson.getInsertJson(result);
-		System.out.println("insertJson=" + insertJson);
+		String updateJson = resultJson.getUpdateJson(result);
+		System.out.println("updateJson=" + updateJson);
 
 		// 5.发送json给前端
-		response.getOutputStream().write(insertJson.getBytes("utf-8"));
+		response.getOutputStream().write(updateJson.getBytes("utf-8"));
 		System.out.println("response successfully");
 	}
 

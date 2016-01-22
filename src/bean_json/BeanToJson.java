@@ -176,7 +176,7 @@ public class BeanToJson
 
 		ExecuteSQL executeSQL = new ExecuteSQL();
 		ResultSet reSet = executeSQL.getSelectResult(sql);
-		String name = "default";
+		String name = "";
 		while (reSet.next())
 		{
 			name = reSet.getString(refvalue);
@@ -199,5 +199,21 @@ public class BeanToJson
 			System.out.println("delete failed,result=" + result);
 		}
 		return deleteJson;
+	}
+
+	public String getUpdateJson(int result)
+	{
+		String updateJson = "";
+		if (result == 1)
+		{
+			updateJson = "{\"result\":\"00\",\"message\":\"OK\"}";
+			System.out.println("update successfully,result=" + result);
+		}
+		else
+		{
+			updateJson = "{\"result\":\"01\",\"message\":\"OK\"}";
+			System.out.println("update failed,result=" + result);
+		}
+		return updateJson;
 	}
 }

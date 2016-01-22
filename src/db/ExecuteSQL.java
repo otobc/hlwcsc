@@ -51,4 +51,18 @@ public class ExecuteSQL
 		return result;
 	}
 
+	public int getUpdateResult(String updatesql)
+	{
+		int result = 0;
+		try
+		{
+			Statement statement = connection.createStatement();
+			result = statement.executeUpdate(updatesql);
+		} catch (SQLException e)
+		{
+			e.printStackTrace();
+		}
+		return result;
+	}
+
 }

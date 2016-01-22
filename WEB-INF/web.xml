@@ -23,6 +23,11 @@
     <servlet-name>Delete</servlet-name>
     <servlet-class>servlet.Delete</servlet-class>
   </servlet>
+  <servlet>
+    <servlet-name>Update</servlet-name>
+    <servlet-class>servlet.Update</servlet-class>
+  </servlet>
+
 
 
 
@@ -47,6 +52,10 @@
   <servlet-mapping>
     <servlet-name>Delete</servlet-name>
     <url-pattern>/servlet/Delete</url-pattern>
+  </servlet-mapping>
+  <servlet-mapping>
+    <servlet-name>Update</servlet-name>
+    <url-pattern>/servlet/Update</url-pattern>
   </servlet-mapping>
 
 </web-app>
