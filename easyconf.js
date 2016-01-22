@@ -245,10 +245,12 @@ var easyconf = new Object({
         query = ec.getDetailPKV();
 
         if (ec.isUpdateView()) {
+            console.log("update...")
             domain = ec.apps.UPDATE;
             config = {table:ec.table, data:ec.dict2str(ec.detailContent), query:ec.dict2str(query)};
         }
         else if (ec.isInsertView()) {
+            console.log("insert...")
             domain = ec.apps.INSERT;
             config = {table:ec.table, data:ec.dict2str(ec.detailContent)};
         }
@@ -261,7 +263,7 @@ var easyconf = new Object({
             function(response) {
                 if (response.result == "00") {
                     if (ec.isInsertView()) {
-                        ec.setDetailContent([[]]);
+                        ec.setDefaultValue();
                         ec.keyContent = {};
                     }
                 }
@@ -407,7 +409,6 @@ var easyconf = new Object({
             content = data[i];
             if (!isList || column.isShow || column.isPrimaryKey) {
                 if (column.control == ec.controls.CBOX && column.candidate == ec.candidates.FLEXIBLE) {
-                    console.log(content);
                     idx = content.indexOf("|");
                     keyContent = ec.decode(content.substr(0, idx));
                     valueContent = ec.decode(content.substr(idx+1));
