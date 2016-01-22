@@ -37,4 +37,18 @@ public class ExecuteSQL
 		return result;
 	}
 
+	public int getDeleteResult(String deletesql)
+	{
+		int result = 0;
+		try
+		{
+			Statement statement = connection.createStatement();
+			result = statement.executeUpdate(deletesql);
+		} catch (SQLException e)
+		{
+			e.printStackTrace();
+		}
+		return result;
+	}
+
 }

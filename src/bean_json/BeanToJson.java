@@ -184,4 +184,20 @@ public class BeanToJson
 		System.out.println("*|name=" + name);
 		return name;
 	}
+
+	public String getDeleteJson(int result)
+	{
+		String deleteJson = "";
+		if (result == 1)
+		{
+			deleteJson = "{\"result\":\"00\",\"message\":\"OK\"}";
+			System.out.println("delete successfully,result=" + result);
+		}
+		else
+		{
+			deleteJson = "{\"result\":\"01\",\"message\":\"OK\"}";
+			System.out.println("delete failed,result=" + result);
+		}
+		return deleteJson;
+	}
 }

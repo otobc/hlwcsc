@@ -83,12 +83,14 @@ public class URLtoSQL
 					kvquery, table); // 处理使char值加引号
 			ArrayList<String> klist = queryselectTypeList.get(0);
 			ArrayList<String> vlist = queryselectTypeList.get(1);
-			if(vlist.size()>0)
+			if (vlist.size() > 0)
 			{
 				condition = " where " + klist.get(0) + vlist.get(0);
 			}
 			String temp = "";
-			for (int j = 1; j < vlist.size(); j++)//change vlist.size->klist.size to look query para except
+			for (int j = 1; j < vlist.size(); j++)// change
+													// vlist.size->klist.size to
+													// look query para except
 			{
 				temp += " and " + klist.get(j) + vlist.get(j);
 			}
@@ -137,7 +139,8 @@ public class URLtoSQL
 		ArrayList<String> vlist = queryDecodedList.get(1);
 		JsonToBean jsonToBean = new JsonToBean();
 		TableBean tableBean = jsonToBean.getTableBean(table);
-		for (int i = 0; i < vlist.size(); i++)//change vlist.size->klist.size to look query para except
+		for (int i = 0; i < vlist.size(); i++)// change vlist.size->klist.size
+												// to look query para except
 		{
 			for (int j = 0; j < tableBean.columns.size(); j++)
 			{
@@ -177,5 +180,13 @@ public class URLtoSQL
 		queryTypeList.add(vlist);
 		return queryTypeList;
 
+	}
+
+	public String getDeleteSQLFromURL(String table, String query)
+	{
+		String deletesql = "delete from " + table;
+		String condition = getCondition(query, table);
+		deletesql = deletesql + condition;
+		return deletesql;
 	}
 }

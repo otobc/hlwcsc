@@ -19,6 +19,11 @@
     <servlet-name>Search</servlet-name>
     <servlet-class>servlet.Search</servlet-class>
   </servlet>
+  <servlet>
+    <servlet-name>Delete</servlet-name>
+    <servlet-class>servlet.Delete</servlet-class>
+  </servlet>
+
 
 
 
@@ -38,6 +43,10 @@
   <servlet-mapping>
     <servlet-name>Search</servlet-name>
     <url-pattern>/servlet/Search</url-pattern>
+  </servlet-mapping>
+  <servlet-mapping>
+    <servlet-name>Delete</servlet-name>
+    <url-pattern>/servlet/Delete</url-pattern>
   </servlet-mapping>
 
 </web-app>
