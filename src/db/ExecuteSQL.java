@@ -7,17 +7,16 @@ import java.sql.Statement;
 
 public class ExecuteSQL
 {
-	private Connection	connection	= DBConnect.getConnection();
+	private static Connection	connection	= DBConnect.getConnection();
 
-	public ResultSet getExecuteQueryResult(String executeQuerySQL,
-			String begin, String count)
+	public static ResultSet getExecuteQueryResult(String executeQuerySQL)
 	{
 		ResultSet resultSet = null;
 		try
 		{
 			Statement statement = connection.createStatement();
 			resultSet = statement.executeQuery(executeQuerySQL);
-			//x,y
+			System.out.println("execute sql success");
 		} catch (SQLException e)
 		{
 			e.printStackTrace();
@@ -25,21 +24,7 @@ public class ExecuteSQL
 		return resultSet;
 	}
 
-	public ResultSet getExecuteQueryResult(String executeQuerySQL)
-	{
-		ResultSet resultSet = null;
-		try
-		{
-			Statement statement = connection.createStatement();
-			resultSet = statement.executeQuery(executeQuerySQL);
-		} catch (SQLException e)
-		{
-			e.printStackTrace();
-		}
-		return resultSet;
-	}
-
-	public int getExecuteUpdateResult(String executeUpdateSQL)
+	public static int getExecuteUpdateResult(String executeUpdateSQL)
 	{
 		int result = 0;
 		try

@@ -49,7 +49,7 @@ public class URLtoSQL
 		String values = "";
 		ArrayList<ArrayList<String>> dataTypeList = judgekTypeToSetv(kvdata,
 				table);// 处理使char值加双引号
-		ArrayList<String> vlist = dataTypeList.get(1);//klist not used
+		ArrayList<String> vlist = dataTypeList.get(1);// klist not used
 		int i;
 		for (i = 0; i < vlist.size() - 1; i++)
 		{
@@ -61,8 +61,7 @@ public class URLtoSQL
 		return insertsql;
 	}
 
-	public String getSearchSQLFromURL(String table, String kdata,
-			String kvquery)
+	public String getSearchSQLFromURL(String table, String kdata, String kvquery)
 	{
 		String searchsql = null;
 		String cols = "";
@@ -109,8 +108,7 @@ public class URLtoSQL
 				.decodeBase64Sentence(kvquery);
 		ArrayList<String> klist = queryDecodedList.get(0);
 		ArrayList<String> vlist = queryDecodedList.get(1);
-		JsonToBean jsonToBean = new JsonToBean();
-		TableBean tableBean = jsonToBean.getTableBean(table);
+		TableBean tableBean = JsonToBean.getTableBean(table);
 		for (int i = 0; i < klist.size(); i++)
 		{
 			for (int j = 0; j < tableBean.columns.size(); j++)
@@ -203,7 +201,7 @@ public class URLtoSQL
 		int i;
 		for (i = 1; i < vlist.size(); i++)
 		{
-			setVal =setVal+ ", " + klist.get(i) + "=" + vlist.get(i);
+			setVal = setVal + ", " + klist.get(i) + "=" + vlist.get(i);
 		}
 		String condition = getCondition(kvquery, table);
 		updatesql = updatesql + setVal + condition;// 组成的完整SQL语句

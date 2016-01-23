@@ -33,8 +33,7 @@ public class Range extends HttpServlet
 		System.out.println("rangesql=" + rangesql);
 
 		// 3连接数据库执行得到结果
-		ExecuteSQL executeSQL = new ExecuteSQL();
-		ResultSet resultSet = executeSQL.getExecuteQueryResult(rangesql);
+		ResultSet resultSet = ExecuteSQL.getExecuteQueryResult(rangesql);
 
 		// 4.对结果进行处理映射为json响应串
 		BeanToJson resultJson = new BeanToJson();
