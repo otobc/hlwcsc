@@ -60,6 +60,9 @@ var evaluate = new Object({
             }
         ]
     },
+    table:"evaluate",
+    key:"id",
+    value:"name",
 
     // basic function here, pls do not modify them
     init:function() {
