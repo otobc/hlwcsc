@@ -10,7 +10,7 @@
             <script>
                 var app = angular.module("admin", []);
                 // table definition
-                var table = "edge";
+                var table = "vertex";
             </script>
             <div ng-cloak id="title">
                 <h1>{{ easyconf.conf.title }} {{ easyconf.getSubTitle() }}</h1>
@@ -71,7 +71,6 @@
                                         easyconf.detail($http, $scope.row, easyconf.views.DETAIL);
                                     }
                                     $scope.update = function() {
-                                        console.log("update...");
                                         easyconf.detail($http, $scope.row, easyconf.views.UPDATE);
                                     }
                                     $scope.delete = function() {
