@@ -53,10 +53,10 @@ create table rawdata (
     name	char(8)		not null,
     environmentid varchar(64)	not null,
     nodeid	varchar(64)		not null,
+    time	char(22)	not null,
     datatype	char(1)		not null,
     value	varchar(256),
-    time	char(22)	not null,
-    primary key (id,environmentid,nodeid)
+    primary key (id,environmentid,nodeid,time)
 );
 
 create table wpidxcache (
