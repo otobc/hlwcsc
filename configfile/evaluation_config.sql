@@ -53,7 +53,7 @@ create table rawdata (
     name	char(8)		not null,
     environmentid varchar(64)	not null,
     nodeid	varchar(64)		not null,
-    time	char(22)	not null,
+    time	char(23)	not null,
     datatype	char(1)		not null,
     value	varchar(256),
     primary key (id,environmentid,nodeid,time)
