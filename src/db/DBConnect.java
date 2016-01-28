@@ -12,6 +12,10 @@ public class DBConnect
 {
 	private static final Connection	connection	= new DBConnect().connect();
 
+	private DBConnect(){
+		
+	}
+	
 	public static Connection getConnection()
 	{
 		return connection;

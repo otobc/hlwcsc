@@ -73,7 +73,7 @@ create table experiment (
     name 	varchar(256)	not null,
     wptype	char(1)		not null,
     tester	varchar(256)	not null,
-    bgtime	date		not null,
-    edtime	date		not null,
+    bgtime	char(23)		not null,
+    edtime	char(23)		not null,
     primary key (id)
 );
