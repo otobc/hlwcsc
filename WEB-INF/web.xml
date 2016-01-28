@@ -27,6 +27,11 @@
     <servlet-name>Update</servlet-name>
     <servlet-class>servlet.Update</servlet-class>
   </servlet>
+  <servlet>
+    <servlet-name>Evaluate</servlet-name>
+    <servlet-class>servlet.Evaluate</servlet-class>
+  </servlet>
+
 
 
 
@@ -56,6 +61,10 @@
   <servlet-mapping>
     <servlet-name>Update</servlet-name>
     <url-pattern>/servlet/Update</url-pattern>
+  </servlet-mapping>
+  <servlet-mapping>
+    <servlet-name>Evaluate</servlet-name>
+    <url-pattern>/servlet/Evaluate</url-pattern>
   </servlet-mapping>
 
 </web-app>

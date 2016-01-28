@@ -20,6 +20,7 @@ public class BeanToJson
 {
 	public String getInitJson(String table)
 	{
+		String initJson = "";
 		String path = null;
 		try
 		{
@@ -31,7 +32,6 @@ public class BeanToJson
 			e1.printStackTrace();
 		}
 		File initFile = new File(path);
-		String initJson = "";
 		Scanner input = new Scanner("");
 		try
 		{
@@ -47,6 +47,10 @@ public class BeanToJson
 		} finally
 		{
 			input.close();
+		}
+		if(initJson.equals(""))
+		{
+			initJson="{\"result\":\"01\",\"message\":\"failed\"}";
 		}
 		return initJson;
 	}
@@ -76,7 +80,7 @@ public class BeanToJson
 		bean.data = kvBeanList;
 		ObjectMapper mapper = new ObjectMapper();
 		rangeJson = mapper.writeValueAsString(bean);
-
+		
 		return rangeJson;
 	}
 
@@ -209,7 +213,7 @@ public class BeanToJson
 		}
 		else
 		{
-			updateJson = "{\"result\":\"01\",\"message\":\"OK\"}";
+			updateJson = "{\"result\":\"01\",\"message\":\"failed\"}";
 			System.out.println("update failed,result=" + result);
 		}
 		return updateJson;

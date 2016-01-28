@@ -12,6 +12,10 @@ public class DBConnect
 {
 	private static final Connection	connection	= new DBConnect().connect();
 
+	private DBConnect(){
+		
+	}
+	
 	public static Connection getConnection()
 	{
 		return connection;
@@ -36,7 +40,7 @@ public class DBConnect
 		try
 		{
 			path = DBConnect.class.getClassLoader()
-					.getResource("./database.info").toURI()
+					.getResource("../../configfile/database.info").toURI()
 					.getPath();
 		} catch (URISyntaxException e)
 		{

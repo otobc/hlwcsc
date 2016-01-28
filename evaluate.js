@@ -13,7 +13,7 @@ var evaluate = new Object({
         ENDTIME:"ENDTIME"
     },
     apps:{
-        EVALUATE:"evaluate"
+        EVALUATE:"/servlet/Evaluate"
     },
     categoryIndex:{
         "0":0,
@@ -108,9 +108,9 @@ var evaluate = new Object({
         
         ev.lock();
         ev.chart.showLoading();
-//        http.get(ev.apps.EVALUATE, {params:{id:ev.id, isReadCache:ev.isReadCache}}).success(
-        url = "./evaluate.json";
-        http.get(url).success(
+        http.get(ev.apps.EVALUATE, {params:{id:ev.id, isReadCache:ev.isReadCache}}).success(
+//        url = "./evaluate.json";
+//        http.get(url).success(
             function(response) {
                 ev.chart.hideLoading();
                 ev.experimentInfo = response.experimentInfo;
