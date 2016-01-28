@@ -11,6 +11,7 @@ import org.wltea.expression.*;
 import org.wltea.expression.datameta.Variable;
 
 import basic.Definition;
+import basic.HomoValue;
 import db.DBConnect;
 
 public class Extexp {
@@ -46,7 +47,7 @@ public class Extexp {
 //			List<RawData> group = new ArrayList<RawData>();
 //			Date date = new java.util.Date();
 //			for (int j = 0; j < 10; j++) {
-//				RawData rawData = Data.genData(id, String.format("第%s组的原始数据", id), "00000000", String.format("%08d", i*10+j), date, (Object)random.nextLong());
+//				RawData rawData = Data.genData(id, String.format("第%s组的原始数据", id), "00000000", String.format("%08d", i*10+j), date, new HomoValue(Definition.Datatype.LONG, String.valueOf(random.nextLong())));
 //				group.add(rawData);
 //			}
 //			ret.add(group);
@@ -101,139 +102,52 @@ public class Extexp {
 		String dataId = null;
 		String dataName = null;
 		String dataEnvironmentId = null;
-		Object dataValue = null;
-		Object mergeValue = null;
-		long dataValue_l = 0;
-		double dataValue_d = 0.0;
-		boolean dataValue_b = false;
-		long dataSum_l = 0;
-		double dataSum_d = 0.0;
-		double dataAvg = 0.0;
-		long dataMax_l = 0;
-		double dataMax_d = 0.0;
-		long dataMin_l = 0;
-		double dataMin_d = 0.0;
-		boolean dataAll = false;
-		boolean dataAny = false;
-		boolean dataNone = true;
+		
+		
+
 		Date dataTime = null;
 		
 		for(Iterator<List<RawData>> i = data.iterator();i.hasNext();) {
 			List<RawData> group = i.next();
-			dataSum_l = 0;
-			dataSum_d = 0.0;
 			long count = 0;
+			HomoValue mergeValue = new HomoValue();
 			for(Iterator<RawData> j = group.iterator();j.hasNext();) {
 				RawData rawData = j.next();
 				dataId = rawData.id;
 				dataName = rawData.name;
 				dataEnvironmentId = rawData.environmentId;
-				dataValue = rawData.value;
 				dataTime = rawData.time;
-				if (dataValue instanceof Long) {
-					dataValue_l = (long)dataValue;
-					if (0 == count) {
-						dataMax_l = dataMin_l = dataValue_l;
-					}
-					else {
-						dataMax_l = dataValue_l > dataMax_l ? dataValue_l : dataMax_l;
-						dataMin_l = dataValue_l < dataMin_l ? dataValue_l : dataMin_l;
-					}
-					
-					dataSum_l += dataValue_l;
-				}
-				else if (dataValue instanceof Double) {
-					dataValue_d = (double)dataValue;
-					if (0 == count) {
-						dataMax_d = dataMin_d = dataValue_d;
-					}
-					else {
-						dataMax_d = dataValue_d > dataMax_d ? dataValue_d : dataMax_d;					
-						dataMin_d = dataValue_d < dataMin_d ? dataValue_d : dataMin_d;
-					}
-					dataSum_d += dataValue_d;
-				}
-				else if (dataValue instanceof Boolean) {
-					dataValue_b = (Boolean)dataValue;
-					dataAll &= dataValue_b;
-					dataAny |= dataValue_b;
-					dataNone &= !dataValue_b;
-				}
-				else {
-					throw new Exception(String.format("merge_basic，错误的数据类型"));
+				
+				switch (flag) {
+				case Definition.MergeBasicArgs.AVG:
+					mergeValue.add(rawData.homoValue);
+					break;
+				case Definition.MergeBasicArgs.SUM:
+					mergeValue.add(rawData.homoValue);
+					break;
+				case Definition.MergeBasicArgs.MAX:
+					mergeValue.max(rawData.homoValue);
+					break;
+				case Definition.MergeBasicArgs.MIN:
+					mergeValue.min(rawData.homoValue);
+					break;
+				case Definition.MergeBasicArgs.ALL:
+					mergeValue.all(rawData.homoValue);
+					break;
+				case Definition.MergeBasicArgs.ANY:
+					mergeValue.any(rawData.homoValue);
+					break;
+				case Definition.MergeBasicArgs.NONE:
+					mergeValue.none(rawData.homoValue);
+					break;
+				default:
+					throw new Exception(String.format("merge_basic，错误的参数[%d]", flag));
 				}
 				count += 1;
 			}
 
-			switch (flag) {
-			case Definition.MergeBasicArgs.AVG:
-				if (dataValue instanceof Long) {
-					dataAvg = dataSum_l / (1.0 * group.size());
-				}
-				else {
-					dataAvg = dataSum_d / group.size();
-				}
-				mergeValue = dataAvg;
-				break;
-			case Definition.MergeBasicArgs.SUM:
-				if (dataValue instanceof Long) {
-					mergeValue = dataSum_l;
-				}
-				else if (dataValue instanceof Double) {
-					mergeValue = dataSum_d;
-				}
-				else {
-					throw new Exception(String.format("merge_basic，参数[%d]与类型不匹配", flag));
-				}
-				break;
-			case Definition.MergeBasicArgs.MAX:
-				if (dataValue instanceof Long) {
-					mergeValue = dataMax_l;
-				}
-				else if (dataValue instanceof Double) {
-					mergeValue = dataMax_d;
-				}
-				else {
-					throw new Exception(String.format("merge_basic，参数[%d]与类型不匹配", flag));
-				}
-				break;
-			case Definition.MergeBasicArgs.MIN:
-				if (dataValue instanceof Long) {
-					mergeValue = dataMin_l;
-				}
-				else if (dataValue instanceof Double) {
-					mergeValue = dataMin_d;
-				}
-				else {
-					throw new Exception(String.format("merge_basic，参数[%d]与类型不匹配", flag));
-				}
-				break;
-			case Definition.MergeBasicArgs.ALL:
-				if (dataValue instanceof Boolean) {
-					mergeValue = dataAll;
-				}
-				else {
-					throw new Exception(String.format("merge_basic，参数[%d]与类型不匹配", flag));
-				}
-				break;
-			case Definition.MergeBasicArgs.ANY:
-				if (dataValue instanceof Boolean) {
-					mergeValue = dataAny;
-				}
-				else {
-					throw new Exception(String.format("merge_basic，参数[%d]与类型不匹配", flag));
-				}
-				break;
-			case Definition.MergeBasicArgs.NONE:
-				if (dataValue instanceof Boolean) {
-					mergeValue = dataNone;
-				}
-				else {
-					throw new Exception(String.format("merge_basic，参数[%d]与类型不匹配", flag));
-				}
-				break;
-			default:
-				throw new Exception(String.format("merge_basic，错误的参数[%d]", flag));
+			if (flag == Definition.MergeBasicArgs.AVG) {
+				mergeValue.avg(count);
 			}
 			
 			MergeData mergeData = Data.genData(dataId, dataName, dataEnvironmentId, dataTime, mergeValue);
@@ -246,64 +160,54 @@ public class Extexp {
 		if (data.size() == 0) {
 			throw new Exception(String.format("estimate_basic，输入数据为空"));
 		}
-		Object ret = null;
-		Object dataValue = null;
-		long dataValue_l = 0;
-		double dataValue_d = 0.0;
-		double dataAvg = 0.0;
-		long dataSum_l = 0;
-		double dataSum_d = 0.0;
-		long dataMax_l = 0;
-		double dataMax_d = 0.0;
-		long dataMin_l = 0;
-		double dataMin_d = 0.0;
-		Object dataNearest = null;
-		Object dataEarlier = null;
+		
+		HomoValue dataValue = new HomoValue();
+
+		HomoValue dataNearest = null;
+		HomoValue dataEarlier = null;
+		HomoValue dataLater = null;
+		
 		Date earlier = null;
-		Object dataLater = null;
 		Date later = null;
 		Date dataTime = null;
 		
 		long count = 0;
 		for(Iterator<MergeData> i = data.iterator();i.hasNext();) {
 			MergeData mergeData = i.next();
-			dataValue = mergeData.value;
 			dataTime = mergeData.time;
-			if (dataValue instanceof Long) {
-				dataValue_l = (long)dataValue;
-				if (0 == count) {
-					dataMax_l = dataMin_l = dataValue_l;
-				}
-				else {
-					dataMax_l = dataValue_l > dataMax_l ? dataValue_l : dataMax_l;
-					dataMin_l = dataValue_l < dataMin_l ? dataValue_l : dataMin_l;
-				}
-				dataSum_l += dataValue_l;
-			}
-			else if (dataValue instanceof Double) {
-				dataValue_d = (double)dataValue;
-				if (0 == count) {
-					dataMax_d = dataMin_d = dataValue_d;
-				}
-				else {
-					dataMax_d = dataValue_d > dataMax_d ? dataValue_d : dataMax_d;					
-					dataMin_d = dataValue_d < dataMin_d ? dataValue_d : dataMin_d;
-				}
-				dataSum_d += dataValue_d;
-			}
 			
+			switch (flag) {
+			case Definition.EstimateBasicArgs.AVG:
+				dataValue.add(mergeData.homoValue);
+				break;
+			case Definition.EstimateBasicArgs.MAX:
+				dataValue.max(mergeData.homoValue);
+				break;
+			case Definition.EstimateBasicArgs.MIN:
+				dataValue.min(mergeData.homoValue);
+				break;
+			case Definition.EstimateBasicArgs.NEAREST:
+				break;
+			case Definition.EstimateBasicArgs.EARLIER:
+				break;
+			case Definition.EstimateBasicArgs.LATER:
+				break;
+			default:
+				throw new Exception(String.format("estimate_basic，错误的参数[%d]", flag));
+			}
 			if (dataTime.before(t) || dataTime.equals(t)) {
 				if (earlier == null || earlier.before(dataTime)) {
 					earlier = dataTime;
-					dataEarlier = dataValue;
+					dataEarlier = mergeData.homoValue;
 				}
 			}
 			if (dataTime.after(t) || dataTime.equals(t)) {
 				if (later == null || later.after(dataTime)) {
 					later = dataTime;
-					dataLater = dataValue;
+					dataLater = mergeData.homoValue;
 				}
 			}
+			
 			count += 1;
 		}
 		
@@ -324,68 +228,36 @@ public class Extexp {
 			}
 		}
 		
+		
 		switch (flag) {
 		case Definition.EstimateBasicArgs.AVG:
-			if (dataValue instanceof Long) {
-				dataAvg = dataSum_l / 1.0 * data.size();
-			}
-			else {
-				dataAvg = dataSum_d / data.size();
-			}
-			ret = dataAvg;
-			break;
-		case Definition.EstimateBasicArgs.MAX:
-			if (dataValue instanceof Long) {
-				ret = dataMax_l;
-			}
-			else if (dataValue instanceof Double) {
-				ret = dataMax_d;
-			}
-			else {
-				throw new Exception(String.format("estimate_basic，参数[%d]与类型不匹配", flag));
-			}
-			break;
-		case Definition.EstimateBasicArgs.MIN:
-			if (dataValue instanceof Long) {
-				ret = dataMin_l;
-			}
-			else if (dataValue instanceof Double) {
-				ret = dataMin_d;
-			}
-			else {
-				throw new Exception(String.format("estimate_basic，参数[%d]与类型不匹配", flag));
-			}
+			dataValue.avg(count);
 			break;
 		case Definition.EstimateBasicArgs.NEAREST:
-			ret = dataNearest;
-			break;
+			dataValue = dataNearest;
 		case Definition.EstimateBasicArgs.EARLIER:
-			if (earlier != null) {
-				ret = dataEarlier;
+			if (dataEarlier == null) {
+				throw new Exception(String.format("estimate_basic，时间范围不准确"));
 			}
-			else {
-				throw new Exception(String.format("estimate_basic，参数[%d]，时间[%s]超出范围", flag, dateFm.format(t)));
-			}
+			dataValue = dataEarlier;
 			break;
 		case Definition.EstimateBasicArgs.LATER:
-			if (later != null) {
-				ret = dataLater;
+			if (dataLater == null) {
+				throw new Exception(String.format("estimate_basic，时间范围不准确"));
 			}
-			else {
-				throw new Exception(String.format("estimate_basic，参数[%d]，时间[%s]超出范围", flag, dateFm.format(t)));
-			}
+			dataValue = dataLater;
 			break;
 		default:
 			throw new Exception(String.format("estimate_basic，错误的参数[%d]", flag));
 		}
 		
-		return ret;
+		return dataValue.getValue();
 	}
 	
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	public static void main(String[] args) throws Exception {
 
-		Date t = todate("2016-01-15 13:44:22.00");
+		Date t = todate("2016-01-27 15:26:36.903");
 		String expression = null;
 		List<Variable> variables = new ArrayList<Variable>();
 		variables.add(Variable. createVariable ("t", t));

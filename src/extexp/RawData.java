@@ -2,12 +2,14 @@ package extexp;
 
 import java.util.Date;
 
+import basic.HomoValue;
+
 class RawData extends Data {
 	
 	public String nodeId;
 
-	public RawData(String id, String name, String environmentId, String nodeId, Date time, Object value){
-		super(id, name, environmentId, time, value);
+	public RawData(String id, String name, String environmentId, String nodeId, Date time, HomoValue homoValue){
+		super(id, name, environmentId, time, homoValue);
 		this.nodeId = nodeId;
 	}
 	
@@ -17,6 +19,6 @@ class RawData extends Data {
 				+ this.environmentId + ", "
 				+ this.nodeId + ", "
 				+ Extexp.dateToString(this.time) + ", "
-				+ this.value+ ")";
+				+ this.homoValue+ ")";
 	}
 }
