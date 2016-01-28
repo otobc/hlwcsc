@@ -14,14 +14,8 @@ import basic.Definition;
 import db.DBConnect;
 
 public class Extexp {
-	@SuppressWarnings("unused")
-	private static Random random = new Random(100);
-	
-	private static SimpleDateFormat dateFm = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SS");
-	
-	static String dateToString(Date date) {
-		return dateFm.format(date);
-	}
+	private static SimpleDateFormat dateFm = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SS");	
+//	private static Random random = new Random(100);
 	
 	// 日期转换
 	public static Date todate(String date) throws ParseException {
@@ -37,17 +31,24 @@ public class Extexp {
 	}
 	
 	// 原始数据提取
-	public static List<List<RawData>> select(String id, String environmentid, Date begintime, Date endtime) throws Exception {
-		List<List<RawData>> ret = new ArrayList<List<RawData>>(); 
+	@SuppressWarnings("rawtypes")
+	public static List<List<List<Comparable>>> select(String id, String environmentid, Date begintime, Date endtime) throws Exception {
+		List<List<List<Comparable>>> ret = new ArrayList<List<List<Comparable>>>(); 
 
 
 //		id = String.format("%08d", random.nextInt(100));
 //		for (int i = 0; i < 5; i++) {
-//			List<RawData> group = new ArrayList<RawData>();
+//			List<List<Comparable>> group = new ArrayList<List<Comparable>>();
 //			Date date = new java.util.Date();
 //			for (int j = 0; j < 10; j++) {
-//				RawData rawData = Data.genData(id, String.format("第%s组的原始数据", id), "00000000", String.format("%08d", i*10+j), date, (Object)random.nextLong());
-//				group.add(rawData);
+//				List<Comparable> nodedata = new ArrayList<Comparable>();
+//				nodedata.add(id);
+//				nodedata.add(String.format("第%s组的原始数据", id));
+//				nodedata.add("00000000");
+//				nodedata.add(String.format("%08d", i*10+j));
+//				nodedata.add(random.nextLong());
+//				nodedata.add(date);
+//				group.add(nodedata);
 //			}
 //			ret.add(group);
 //			Thread.sleep(1000);
@@ -56,36 +57,44 @@ public class Extexp {
 		
 		Connection connection = DBConnect.getConnection();
 		Statement stat = connection.createStatement();
-		String sql = "select * from rawdata where id = \"" + id + "\" and environmentid = \"" + environmentid + "\"  and time between \""+ dateToString(begintime) +"\" and \"" + dateToString(endtime) + "\" order by time;";
+		String sql = "select * from rawdata where id = \"" + id + "\" and environmentid = \"" + environmentid + "\" order by time;";
+
 		ResultSet rs = stat.executeQuery(sql);
-		String lastTime = null;
-		String firstDataType = null;
-		List<RawData> group = null;
+		String lastTime = null; 
+		List<List<Comparable>> group = null;
 		while (rs.next()) {
-			String time = rs.getString("time");
+			List<Comparable> nodedata = new ArrayList<Comparable>();
+			nodedata.add(rs.getString("id"));
+			nodedata.add(rs.getString("name"));
+			nodedata.add(rs.getString("environmentid"));
+			nodedata.add(rs.getString("nodeid"));
 			String dataType = rs.getString("datatype");
-			
-			if (lastTime != null && !lastTime.equals(time)) {
-				ret.add(group);
-				group = new ArrayList<RawData>();
+			if (dataType.equals(Definition.Datatype.STRING)) {
+				nodedata.add(rs.getString("value"));
+			}
+			else if (dataType.equals(Definition.Datatype.LONG)) {
+				nodedata.add(rs.getLong("value"));
+			}
+			else if (dataType.equals(Definition.Datatype.DOUBLE)) {
+				nodedata.add(rs.getDouble("value"));
+			}
+			else if (dataType.equals(Definition.Datatype.BOOLEAN)) {
+				nodedata.add(rs.getBoolean("value"));
 			}
 			else {
-				group = new ArrayList<RawData>();
+				throw new Exception(String.format("select，错误的数据类型"));
 			}
-			
-			if (firstDataType != null) {
-				if (!firstDataType.equals(dataType)) {
-					throw new Exception(String.format("select，数据类型不统一"));
+			String time =  rs.getString("time");
+			nodedata.add(todate(time));
+			if (!time.equals(lastTime)) {
+				if (lastTime != null)
+				{
+					ret.add(group);
+					
 				}
+				group = new ArrayList<List<Comparable>>();
 			}
-			else {
-				firstDataType = dataType;
-			}
-			
-			
-			RawData rawData = Data.genData(rs);
-			group.add(rawData);
-			
+			group.add(nodedata);
 			lastTime = time;
 		}
 		ret.add(group);
@@ -93,140 +102,141 @@ public class Extexp {
 	}
 	
 	// 基础融合函数
-	public static List<MergeData> merge_basic(List<List<RawData>> data, int flag) throws Exception {
-		if (data.size() == 1 && data.get(0) == null) {
+	@SuppressWarnings("rawtypes")
+	public static List<List<Comparable>> merge_basic(List<List<List<Comparable>>> data, int flag) throws Exception {
+		if (data.size() == 0) {
 			throw new Exception(String.format("merge_basic，输入数据为空"));
 		}
-		List<MergeData> ret = new ArrayList<MergeData>();
-		String dataId = null;
-		String dataName = null;
-		String dataEnvironmentId = null;
-		Object dataValue = null;
-		Object mergeValue = null;
-		long dataValue_l = 0;
-		double dataValue_d = 0.0;
-		boolean dataValue_b = false;
-		long dataSum_l = 0;
-		double dataSum_d = 0.0;
-		double dataAvg = 0.0;
-		long dataMax_l = 0;
-		double dataMax_d = 0.0;
-		long dataMin_l = 0;
-		double dataMin_d = 0.0;
-		boolean dataAll = false;
-		boolean dataAny = false;
-		boolean dataNone = true;
-		Date dataTime = null;
+		List<List<Comparable>> ret = new ArrayList<List<Comparable>>();
+		String dataid = null;
+		String dataname = null;
+		Object datavalue = null;
+		long datavalue_l = 0;
+		double datavalue_d = 0.0;
+		boolean datavalue_b = false;
+		long datasum_l = 0;
+		double datasum_d = 0.0;
+		double dataavg = 0.0;
+		long datamax_l = 0;
+		double datamax_d = 0.0;
+		long datamin_l = 0;
+		double datamin_d = 0.0;
+		boolean dataall = false;
+		boolean dataany = false;
+		boolean datanone = true;
+		Date datatime = null;
 		
-		for(Iterator<List<RawData>> i = data.iterator();i.hasNext();) {
-			List<RawData> group = i.next();
-			dataSum_l = 0;
-			dataSum_d = 0.0;
+		for(Iterator<List<List<Comparable>>> i = data.iterator();i.hasNext();) {
+			List<List<Comparable>> group = i.next();
+			datasum_l = 0;
+			datasum_d = 0.0;
 			long count = 0;
-			for(Iterator<RawData> j = group.iterator();j.hasNext();) {
-				RawData rawData = j.next();
-				dataId = rawData.id;
-				dataName = rawData.name;
-				dataEnvironmentId = rawData.environmentId;
-				dataValue = rawData.value;
-				dataTime = rawData.time;
-				if (dataValue instanceof Long) {
-					dataValue_l = (long)dataValue;
+			for(Iterator<List<Comparable>> j = group.iterator();j.hasNext();) {
+				List<Comparable> nodedata = j.next();
+				dataid = (String)nodedata.get(0);
+				dataname = (String)nodedata.get(1);
+				datavalue = nodedata.get(4);
+				datatime = (Date)nodedata.get(5);
+				if (datavalue instanceof Long) {
+					datavalue_l = (long)datavalue;
 					if (0 == count) {
-						dataMax_l = dataMin_l = dataValue_l;
+						datamax_l = datamin_l = datavalue_l;
 					}
 					else {
-						dataMax_l = dataValue_l > dataMax_l ? dataValue_l : dataMax_l;
-						dataMin_l = dataValue_l < dataMin_l ? dataValue_l : dataMin_l;
+						datamax_l = datavalue_l > datamax_l ? datavalue_l : datamax_l;
+						datamin_l = datavalue_l < datamin_l ? datavalue_l : datamin_l;
 					}
 					
-					dataSum_l += dataValue_l;
+					datasum_l += datavalue_l;
 				}
-				else if (dataValue instanceof Double) {
-					dataValue_d = (double)dataValue;
+				else if (datavalue instanceof Double) {
+					datavalue_d = (double)datavalue;
 					if (0 == count) {
-						dataMax_d = dataMin_d = dataValue_d;
+						datamax_d = datamin_d = datavalue_d;
 					}
 					else {
-						dataMax_d = dataValue_d > dataMax_d ? dataValue_d : dataMax_d;					
-						dataMin_d = dataValue_d < dataMin_d ? dataValue_d : dataMin_d;
+						datamax_d = datavalue_d > datamax_d ? datavalue_d : datamax_d;					
+						datamin_d = datavalue_d < datamin_d ? datavalue_d : datamin_d;
 					}
-					dataSum_d += dataValue_d;
+					datasum_d += datavalue_d;
 				}
-				else if (dataValue instanceof Boolean) {
-					dataValue_b = (Boolean)dataValue;
-					dataAll &= dataValue_b;
-					dataAny |= dataValue_b;
-					dataNone &= !dataValue_b;
+				else if (datavalue instanceof Boolean) {
+					datavalue_b = (Boolean)datavalue;
+					dataall &= datavalue_b;
+					dataany |= datavalue_b;
+					datanone &= !datavalue_b;
 				}
 				else {
 					throw new Exception(String.format("merge_basic，错误的数据类型"));
 				}
 				count += 1;
 			}
-
+			
+			List<Comparable> merge = new ArrayList<Comparable>();
+			merge.add(dataid);
+			merge.add(dataname);
 			switch (flag) {
 			case Definition.MergeBasicArgs.AVG:
-				if (dataValue instanceof Long) {
-					dataAvg = dataSum_l / (1.0 * group.size());
+				if (datavalue instanceof Long) {
+					dataavg = datasum_l / (1.0 * group.size());
 				}
 				else {
-					dataAvg = dataSum_d / group.size();
+					dataavg = datasum_d / group.size();
 				}
-				mergeValue = dataAvg;
+				merge.add(dataavg);
 				break;
 			case Definition.MergeBasicArgs.SUM:
-				if (dataValue instanceof Long) {
-					mergeValue = dataSum_l;
+				if (datavalue instanceof Long) {
+					merge.add(datasum_l);
 				}
-				else if (dataValue instanceof Double) {
-					mergeValue = dataSum_d;
+				else if (datavalue instanceof Double) {
+					merge.add(datasum_d);
 				}
 				else {
 					throw new Exception(String.format("merge_basic，参数[%d]与类型不匹配", flag));
 				}
 				break;
 			case Definition.MergeBasicArgs.MAX:
-				if (dataValue instanceof Long) {
-					mergeValue = dataMax_l;
+				if (datavalue instanceof Long) {
+					merge.add(datamax_l);
 				}
-				else if (dataValue instanceof Double) {
-					mergeValue = dataMax_d;
+				else if (datavalue instanceof Double) {
+					merge.add(datamax_d);
 				}
 				else {
 					throw new Exception(String.format("merge_basic，参数[%d]与类型不匹配", flag));
 				}
 				break;
 			case Definition.MergeBasicArgs.MIN:
-				if (dataValue instanceof Long) {
-					mergeValue = dataMin_l;
+				if (datavalue instanceof Long) {
+					merge.add(datamin_l);
 				}
-				else if (dataValue instanceof Double) {
-					mergeValue = dataMin_d;
+				else if (datavalue instanceof Double) {
+					merge.add(datamin_d);
 				}
 				else {
 					throw new Exception(String.format("merge_basic，参数[%d]与类型不匹配", flag));
 				}
 				break;
 			case Definition.MergeBasicArgs.ALL:
-				if (dataValue instanceof Boolean) {
-					mergeValue = dataAll;
+				if (datavalue instanceof Boolean) {
+					merge.add(dataall);
 				}
 				else {
 					throw new Exception(String.format("merge_basic，参数[%d]与类型不匹配", flag));
 				}
 				break;
 			case Definition.MergeBasicArgs.ANY:
-				if (dataValue instanceof Boolean) {
-					mergeValue = dataAny;
+				if (datavalue instanceof Boolean) {
+					merge.add(dataany);
 				}
 				else {
 					throw new Exception(String.format("merge_basic，参数[%d]与类型不匹配", flag));
 				}
 				break;
 			case Definition.MergeBasicArgs.NONE:
-				if (dataValue instanceof Boolean) {
-					mergeValue = dataNone;
+				if (datavalue instanceof Boolean) {
+					merge.add(datanone);
 				}
 				else {
 					throw new Exception(String.format("merge_basic，参数[%d]与类型不匹配", flag));
@@ -236,132 +246,133 @@ public class Extexp {
 				throw new Exception(String.format("merge_basic，错误的参数[%d]", flag));
 			}
 			
-			MergeData mergeData = Data.genData(dataId, dataName, dataEnvironmentId, dataTime, mergeValue);
-			ret.add(mergeData);
+			merge.add(datatime);
+			ret.add(merge);
 		}
 		return ret;
 	}
 	
-	public static Object estimate_basic(List<MergeData> data, Date t, int flag) throws Exception {
+	@SuppressWarnings("rawtypes")
+	public static Object estimate_basic(List<List<Comparable>> data, Date t, int flag) throws Exception {
 		if (data.size() == 0) {
 			throw new Exception(String.format("estimate_basic，输入数据为空"));
 		}
 		Object ret = null;
-		Object dataValue = null;
-		long dataValue_l = 0;
-		double dataValue_d = 0.0;
-		double dataAvg = 0.0;
-		long dataSum_l = 0;
-		double dataSum_d = 0.0;
-		long dataMax_l = 0;
-		double dataMax_d = 0.0;
-		long dataMin_l = 0;
-		double dataMin_d = 0.0;
-		Object dataNearest = null;
-		Object dataEarlier = null;
+		Object datavalue = null;
+		long datavalue_l = 0;
+		double datavalue_d = 0.0;
+		double dataavg = 0.0;
+		long datasum_l = 0;
+		double datasum_d = 0.0;
+		long datamax_l = 0;
+		double datamax_d = 0.0;
+		long datamin_l = 0;
+		double datamin_d = 0.0;
+		Object datanearest = null;
+		Object dataearlier = null;
 		Date earlier = null;
-		Object dataLater = null;
+		Object datalater = null;
 		Date later = null;
-		Date dataTime = null;
+		Date datatime = null;
 		
 		long count = 0;
-		for(Iterator<MergeData> i = data.iterator();i.hasNext();) {
-			MergeData mergeData = i.next();
-			dataValue = mergeData.value;
-			dataTime = mergeData.time;
-			if (dataValue instanceof Long) {
-				dataValue_l = (long)dataValue;
+		for(Iterator<List<Comparable>> i = data.iterator();i.hasNext();) {
+			List<Comparable> nodedata = i.next();
+			datavalue = nodedata.get(2);
+			datatime = (Date)nodedata.get(3);
+			if (datavalue instanceof Long) {
+				datavalue_l = (long)datavalue;
 				if (0 == count) {
-					dataMax_l = dataMin_l = dataValue_l;
+					datamax_l = datamin_l = datavalue_l;
 				}
 				else {
-					dataMax_l = dataValue_l > dataMax_l ? dataValue_l : dataMax_l;
-					dataMin_l = dataValue_l < dataMin_l ? dataValue_l : dataMin_l;
+					datamax_l = datavalue_l > datamax_l ? datavalue_l : datamax_l;
+					datamin_l = datavalue_l < datamin_l ? datavalue_l : datamin_l;
 				}
-				dataSum_l += dataValue_l;
+				datasum_l += datavalue_l;
 			}
-			else if (dataValue instanceof Double) {
-				dataValue_d = (double)dataValue;
+			else if (datavalue instanceof Double) {
+				datavalue_d = (double)datavalue;
 				if (0 == count) {
-					dataMax_d = dataMin_d = dataValue_d;
+					datamax_d = datamin_d = datavalue_d;
 				}
 				else {
-					dataMax_d = dataValue_d > dataMax_d ? dataValue_d : dataMax_d;					
-					dataMin_d = dataValue_d < dataMin_d ? dataValue_d : dataMin_d;
+					datamax_d = datavalue_d > datamax_d ? datavalue_d : datamax_d;					
+					datamin_d = datavalue_d < datamin_d ? datavalue_d : datamin_d;
 				}
-				dataSum_d += dataValue_d;
+				datasum_d += datavalue_d;
 			}
 			
-			if (dataTime.before(t) || dataTime.equals(t)) {
-				if (earlier == null || earlier.before(dataTime)) {
-					earlier = dataTime;
-					dataEarlier = dataValue;
+			if (datatime.before(t) || datatime.equals(t)) {
+				if (earlier == null || earlier.before(datatime)) {
+					earlier = datatime;
+					dataearlier = datavalue;
 				}
 			}
-			if (dataTime.after(t) || dataTime.equals(t)) {
-				if (later == null || later.after(dataTime)) {
-					later = dataTime;
-					dataLater = dataValue;
+			if (datatime.after(t) || datatime.equals(t)) {
+				if (later == null || later.after(datatime)) {
+					later = datatime;
+					datalater = datavalue;
 				}
 			}
 			count += 1;
 		}
 		
 		if (earlier == null) {
-			dataNearest = dataLater;
+			datanearest = datalater;
 		}
 		else if (later == null) {
-			dataNearest = dataEarlier;
+			datanearest = dataearlier;
 		}
 		else {
 			long diff_earlier = t.getTime() - earlier.getTime();
 			long diff_later = later.getTime() - t.getTime();
 			if (diff_earlier < diff_later) {
-				dataNearest = dataEarlier;
+				datanearest = dataearlier;
 			}
 			else {
-				dataNearest = dataLater;
+				datanearest = datalater;
 			}
 		}
 		
 		switch (flag) {
 		case Definition.EstimateBasicArgs.AVG:
-			if (dataValue instanceof Long) {
-				dataAvg = dataSum_l / 1.0 * data.size();
+			if (datavalue instanceof Long) {
+				dataavg = datasum_l / 1.0 * data.size();
 			}
 			else {
-				dataAvg = dataSum_d / data.size();
+				dataavg = datasum_d / data.size();
 			}
-			ret = dataAvg;
+			ret = dataavg;
 			break;
 		case Definition.EstimateBasicArgs.MAX:
-			if (dataValue instanceof Long) {
-				ret = dataMax_l;
+			if (datavalue instanceof Long) {
+				ret = datamax_l;
 			}
-			else if (dataValue instanceof Double) {
-				ret = dataMax_d;
+			else if (datavalue instanceof Double) {
+				ret = datamax_d;
 			}
 			else {
 				throw new Exception(String.format("estimate_basic，参数[%d]与类型不匹配", flag));
 			}
 			break;
 		case Definition.EstimateBasicArgs.MIN:
-			if (dataValue instanceof Long) {
-				ret = dataMin_l;
+			if (datavalue instanceof Long) {
+				ret = datamin_l;
 			}
-			else if (dataValue instanceof Double) {
-				ret = dataMin_d;
+			else if (datavalue instanceof Double) {
+				ret = datamin_d;
 			}
 			else {
 				throw new Exception(String.format("estimate_basic，参数[%d]与类型不匹配", flag));
 			}
 			break;
 		case Definition.EstimateBasicArgs.NEAREST:
-			ret = dataNearest;
+			ret = datanearest;
 			break;
 		case Definition.EstimateBasicArgs.EARLIER:
 			if (earlier != null) {
-				ret = dataEarlier;
+				ret = dataearlier;
 			}
 			else {
 				throw new Exception(String.format("estimate_basic，参数[%d]，时间[%s]超出范围", flag, dateFm.format(t)));
@@ -369,7 +380,7 @@ public class Extexp {
 			break;
 		case Definition.EstimateBasicArgs.LATER:
 			if (later != null) {
-				ret = dataLater;
+				ret = datalater;
 			}
 			else {
 				throw new Exception(String.format("estimate_basic，参数[%d]，时间[%s]超出范围", flag, dateFm.format(t)));
@@ -390,15 +401,15 @@ public class Extexp {
 		List<Variable> variables = new ArrayList<Variable>();
 		variables.add(Variable. createVariable ("t", t));
 		
-		expression = "$SELECT(\"00000015\", \"00000000\", $TODATE(\"2016-01-27 15:26:36.902\"), $TODATE(\"2016-01-27 15:26:36.906\"))";
+		expression = "$SELECT(\"00000015\", \"00000000\", $TODATE(\"2016-01-06 10:00:00.00\"), $TODATE(\"2016-01-06 10:03:00.00\"))";
 		List<List<List<Comparable>>> rawdata = (List<List<List<Comparable>>>)ExpressionEvaluator. evaluate (expression, variables);
 		System.out.println("rawdata:" +rawdata);
 		
-		expression = "$MERGE_BASIC($SELECT(\"00000015\", \"00000000\", $TODATE(\"2016-01-27 15:26:36.902\"), $TODATE(\"2016-01-27 15:26:36.906\")), 0)";
+		expression = "$MERGE_BASIC($SELECT(\"00000015\", \"00000000\", $TODATE(\"2016-01-06 10:00:00.00\"), $TODATE(\"2016-01-06 10:03:00.00\")), 0)";
 		List<List<Comparable>> mergedata = (List<List<Comparable>>)ExpressionEvaluator. evaluate (expression, variables);		
 		System.out.println("mergedata:" + mergedata);
 		
-		expression = "$ESTIMATE_BASIC($MERGE_BASIC($SELECT(\"00000015\", \"00000000\", $TODATE(\"2016-01-27 15:26:36.902\"), $TODATE(\"2016-01-27 15:26:36.906\")), 0), t, 3)";
+		expression = "$ESTIMATE_BASIC($MERGE_BASIC($SELECT(\"00000015\", \"00000000\", $TODATE(\"2016-01-06 10:00:00.00\"), $TODATE(\"2016-01-06 10:03:00.00\")), 0), t, 3)";
 		Object estimatedata = ExpressionEvaluator. evaluate (expression, variables);
 		System.out.println("estimatedata:" + estimatedata);
 	}

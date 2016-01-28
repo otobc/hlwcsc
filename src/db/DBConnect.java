@@ -40,7 +40,7 @@ public class DBConnect
 		try
 		{
 			path = DBConnect.class.getClassLoader()
-					.getResource("./database.info").toURI()
+					.getResource("../../configfile/database.info").toURI()
 					.getPath();
 		} catch (URISyntaxException e)
 		{
