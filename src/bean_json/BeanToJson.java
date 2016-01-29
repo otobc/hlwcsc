@@ -48,9 +48,9 @@ public class BeanToJson
 		{
 			input.close();
 		}
-		if(initJson.equals(""))
+		if (initJson.equals(""))
 		{
-			initJson="{\"result\":\"01\",\"message\":\"failed\"}";
+			initJson = "{\"result\":\"01\",\"message\":\"failed\"}";
 		}
 		return initJson;
 	}
@@ -80,7 +80,7 @@ public class BeanToJson
 		bean.data = kvBeanList;
 		ObjectMapper mapper = new ObjectMapper();
 		rangeJson = mapper.writeValueAsString(bean);
-		
+
 		return rangeJson;
 	}
 
@@ -118,7 +118,8 @@ public class BeanToJson
 				ArrayList<String> vlist = new ArrayList<String>();// a new one
 				for (int i = 0; i < klist.size(); i++)
 				{
-					String value = resultSet.getString(klist.get(i));
+					String value = "";
+					value = resultSet.getString(klist.get(i));
 					for (int j = 0; j < tableBean.columns.size(); j++)
 					{
 						if (tableBean.columns.get(j).id.equals(klist.get(i))
@@ -126,8 +127,11 @@ public class BeanToJson
 						{
 							String name = getName(resultSet, tableBean, value,
 									j);
-							value = Base64.encodeBase64String(value) + "|"
-									+ Base64.encodeBase64String(name);
+							if (!(value == null))
+								value = Base64.encodeBase64String(value) + "|"
+										+ Base64.encodeBase64String(name);
+							else
+								value = "none";
 							break;
 						}
 					}
