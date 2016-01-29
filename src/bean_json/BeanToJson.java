@@ -21,7 +21,7 @@ public class BeanToJson
 	public String getInitJson(String table)
 	{
 		String initJson = "";
-		String path = null;
+		String path = "";
 		try
 		{
 			path = JsonToBean.class.getClassLoader()

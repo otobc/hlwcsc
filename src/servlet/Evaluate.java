@@ -22,8 +22,9 @@ public class Evaluate extends HttpServlet
 	{
 		String evaluateId = request.getParameter("id");
 		String isReadCache = request.getParameter("isReadCache");
-		System.out.println("evaluateId="+evaluateId+"\nisReadCache"+isReadCache);
+		System.out.println("evaluateId="+evaluateId+"\nisReadCache="+isReadCache);
 		
+		EvaluateBean.evaluateId=evaluateId;
 		EvaluateBean.isReadCache=isReadCache;
 		
 		TreeToJson tr = new TreeToJson();

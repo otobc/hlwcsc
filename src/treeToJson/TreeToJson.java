@@ -12,7 +12,7 @@ import org.codehaus.jackson.JsonGenerationException;
 import org.codehaus.jackson.map.JsonMappingException;
 import org.codehaus.jackson.map.ObjectMapper;
 
-import newEvaluatioin.*;
+import newEvaluation.*;
 
 public class TreeToJson {
 	public String toJson(String evaluateId) throws SQLException, IllegalAccessException, IllegalArgumentException, InvocationTargetException, JsonGenerationException, JsonMappingException, IOException, ParseException{
