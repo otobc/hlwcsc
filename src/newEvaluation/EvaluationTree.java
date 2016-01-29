@@ -143,12 +143,14 @@ public class EvaluationTree
 	 * 
 	 * @param isReadCache
 	 * @throws ParseException
-	 * @throws InvocationTargetException 
-	 * @throws IllegalArgumentException 
-	 * @throws IllegalAccessException 
+	 * @throws InvocationTargetException
+	 * @throws IllegalArgumentException
+	 * @throws IllegalAccessException
 	 */
 	public void initial(ArrayList<ArrayList<EdgeNode>> tree, String evaluateId)
-			throws SQLException, UnsupportedEncodingException, ParseException, IllegalAccessException, IllegalArgumentException, InvocationTargetException
+			throws SQLException, UnsupportedEncodingException, ParseException,
+			IllegalAccessException, IllegalArgumentException,
+			InvocationTargetException
 	{
 		// this.evaluationId = evaluateId;
 		ReadDatabase rdb = new ReadDatabase();
@@ -167,16 +169,41 @@ public class EvaluationTree
 				if (EvaluateBean.isReadCache.equals("0"))
 					rdb.computeWpindexcache(wpindexid, evaluateId);
 
-				Double temp = rdb.getValueOfIndex(evaluateId, wpindexid, expid);
+				Object temp = rdb.getValueOfIndex(evaluateId, wpindexid, expid);
+
+				String[] str = temp.getClass().toString().split("\\.");
+				String typeOfTemp = str[str.length - 1];
+				DataType dt;
+				switch (typeOfTemp)
+				{
+				case "String":
+					dt = DataType.DATATYPE_STRING;
+					break;
+				case "Long":
+					dt = DataType.DATATYPE_LONG;
+					break;
+				case "Double":
+					dt = DataType.DATATYPE_DOUBLE;
+					break;
+				case "Boolean":
+					dt = DataType.DATATYPE_BOOLEAN;
+					break;
+				default:
+					dt = null;
+					System.out.println("wpindex datatype error!");
+					break;
+
+				}
 
 				if (nodes.get(i).nmidix.equals("00"))
 				{
 					String expression = nodes.get(i).nmidxexp;
 					List<Variable> var = new ArrayList<Variable>();
-					var.add(new Variable("x", DataType.DATATYPE_DOUBLE, temp));
+					var.add(new Variable("x", dt, temp));
 					nodes.get(i).value = new Double(ExpressionEvaluator
 							.evaluate(expression, var).toString());
-					System.out.println("***************************************");
+					System.out
+							.println("***************************************");
 				}
 				else
 				{

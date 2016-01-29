@@ -18,16 +18,36 @@ public class ReadDatabase
 {
 
 	/** 从数据库指标缓存表得到指标值 */
-	public Double getValueOfIndex(String evaluateid, String wpindexid,
+	public Object getValueOfIndex(String evaluateid, String wpindexid,
 			String expid) throws SQLException
 	{
-		Double result = new Double(0.0d);
-		String sql = "select value from WPIDXCACHE where evaluateid="
+		Object result = new Double(0.0d);
+		String sql = "select * from WPIDXCACHE where evaluateid="
 				+ evaluateid + " and wpindexid=" + wpindexid
 				+ " and experimentid=" + expid;
 		ResultSet rs = ExecuteSQL.getExecuteQueryResult(sql);
 		rs.next();
-		result = Double.valueOf(rs.getString("value"));
+		
+		String datatype = rs.getString("datatype");
+		switch(datatype){
+		case "0":
+			result = rs.getString("value");
+			break;
+		case "1":
+			result = Long.valueOf(rs.getString("value"));
+			break;
+		case "2":
+			result = Double.valueOf(rs.getString("value"));
+			break;
+		case "3":
+			result = Boolean.valueOf(rs.getString("value"));
+			break;
+		default:
+			result = 0;
+			System.out.println("wpindex datatype error!");
+				break;
+		}
+//		result = Double.valueOf(rs.getString("value"));
 		return result;
 	}
 
