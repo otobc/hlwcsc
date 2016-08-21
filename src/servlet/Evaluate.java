@@ -36,6 +36,12 @@ public class Evaluate extends HttpServlet
 				| InvocationTargetException | SQLException | ParseException e)
 		{
 			e.printStackTrace();
+		} catch (NoSuchMethodException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (SecurityException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
 		System.out.println(evaluateJson);
 		

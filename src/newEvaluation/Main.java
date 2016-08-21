@@ -7,7 +7,7 @@ import java.text.ParseException;
 
 public class Main {
 
-	public static void main(String[] args) throws SQLException, UnsupportedEncodingException, IllegalAccessException, IllegalArgumentException, InvocationTargetException, ParseException {
+	public static void main(String[] args) throws SQLException, UnsupportedEncodingException, IllegalAccessException, IllegalArgumentException, InvocationTargetException, ParseException, NoSuchMethodException, SecurityException {
 		// TODO Auto-generated method stub
 		EvaluationTree etree = new EvaluationTree();
 		etree.initial(etree.tree, "001");

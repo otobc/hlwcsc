@@ -30,10 +30,15 @@ public class EvaluationTree
 	 * @throws InvocationTargetException
 	 * @throws IllegalArgumentException
 	 * @throws IllegalAccessException
+	 * @throws SecurityException 
+	 * @throws NoSuchMethodException 
 	 */
 	public void countroot(Node node) throws IllegalAccessException,
-			IllegalArgumentException, InvocationTargetException
+			IllegalArgumentException, InvocationTargetException, NoSuchMethodException, SecurityException
 	{
+		@SuppressWarnings("unused")
+		Meth mth = new Meth();
+		
 		// 找到节点node在ArrayList中的位置
 		int i = 0;
 		while (tree.get(i).get(0).node != node)
@@ -146,12 +151,17 @@ public class EvaluationTree
 	 * @throws InvocationTargetException
 	 * @throws IllegalArgumentException
 	 * @throws IllegalAccessException
+	 * @throws SecurityException 
+	 * @throws NoSuchMethodException 
 	 */
 	public void initial(ArrayList<ArrayList<EdgeNode>> tree, String evaluateId)
 			throws SQLException, UnsupportedEncodingException, ParseException,
 			IllegalAccessException, IllegalArgumentException,
-			InvocationTargetException
+			InvocationTargetException, NoSuchMethodException, SecurityException
 	{
+		@SuppressWarnings("unused")
+		Meth mth = new Meth();
+		
 		// this.evaluationId = evaluateId;
 		ReadDatabase rdb = new ReadDatabase();
 		// rdb.connectDatabase();
