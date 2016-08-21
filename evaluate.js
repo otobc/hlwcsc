@@ -298,7 +298,7 @@ var evaluate = new Object({
         ev.graphOption.series[0].data = data;
         ev.graphOption.series[0].links = links;
         ev.graphOption.series[0].name = response.experimentInfo.name;
-        ev.chart.setOption(ev.graphOption);
+        ev.graph.setOption(ev.graphOption);
     },
 
     showLoading:function(http) {
