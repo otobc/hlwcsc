@@ -52,13 +52,13 @@
                     <tr>
                         <td ng-cloak>
                             {{ evaluate.names.EXPERIMENTID }}
-                        </td ng-cloak>
+                        </td>
                         <td ng-cloak>
                             {{ evaluate.experimentInfo.id }}
                         </td>
                         <td ng-cloak>
                             {{ evaluate.names.EXPERIMENTNAME }}
-                        </td ng-cloak>
+                        </td>
                         <td ng-cloak>
                             {{ evaluate.experimentInfo.name }}
                         </td>
@@ -72,7 +72,7 @@
                     <tr>
                         <td ng-cloak>
                             {{ evaluate.names.TESTER }}
-                        </td ng-cloak>
+                        </td>
                         <td ng-cloak>
                             {{ evaluate.experimentInfo.tester }}
                         </td>
@@ -91,13 +91,54 @@
                     </tr>
                 </table>
             </div>
+            <div id="radar" ng-controller="radar" style="width:100%;height:200px;"></div>
+            <script>
+                app.controller(
+                    "radar", 
+                    function($scope, $http) {
+                        var myChart = echarts.init(document.getElementById("radar"));
+                        evaluate.setRadar(myChart);
+                    }
+                );
+            </script>
+            <div id="line" ng-controller="line" style="width:100%;height:400px;">
+            </div>
+            <script>
+                app.controller(
+                    "line", 
+                    function($scope, $http) {
+                        var myChart = echarts.init(document.getElementById("line"));
+                        evaluate.setLine(myChart);
+                    }
+                );
+            </script>
+            <div>
+                <table style="width:100%;height:200px;">
+                    <tr>
+                        <td id="chartContentList" ng-repeat="chart in evaluate.charts" ng-controller="chartContentList">
+                            <div name="chartContent" style="width:100%;height:200px;"></div>
+                        </td>
+                        <script>
+                            app.controller(
+                                "chartContentList", 
+                                function($scope, $http) {
+                                    var chartContentList = document.getElementsByName("chartContent")
+                                    var chart = evaluate.charts[$scope.$index]
+                                    var myChart = echarts.init(chartContentList[$scope.$index]);
+                                    evaluate.setChart(chart, myChart);
+                                }
+                            );
+                        </script>
+                    </tr>
+                </table>
+            </div>
             <div id="graph" ng-controller="graph" style="width:100%;height:200px;"></div>
             <script>
                 app.controller(
                     "graph", 
                     function($scope, $http) {
                         var myChart = echarts.init(document.getElementById('graph'));
-                        evaluate.setChart(myChart);
+                        evaluate.setGraph(myChart);
                     }
                 );
             </script>
@@ -108,7 +149,7 @@
                 function($scope, $http) {
                     $scope.easyconf = easyconf;
                     $scope.evaluate = evaluate;
-                    easyconf.init($http, "");
+                    easyconf.init($http, "evaluate");
                     evaluate.init();
                 }
             );
