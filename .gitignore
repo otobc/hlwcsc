@@ -15,4 +15,7 @@ hs_err_pid*
 .classpath
 .project
 .settings
-doc
+
+# Outter js
+/angular.min.js/
+/echarts.min.js/
